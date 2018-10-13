@@ -1,18 +1,16 @@
 {
-  "name": "http-server",
+  "name": "test",
   "version": "1.0.0",
-  "description": "The http-server component of the backend.",
+  "description": "A simple database test.",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node test.js"
   },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/Brantech/Outfitter_Backend.git"
   },
-  "author": "Kyle Martinez",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/Brantech/Outfitter_Backend/issues"
   },

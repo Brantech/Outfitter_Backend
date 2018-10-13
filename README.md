@@ -19,8 +19,8 @@ Attaching to mongo, test
 test     | wait-for-it.sh: waiting 15 seconds for mongo:27017
 test     | wait-for-it.sh: mongo:27017 is available after 10 seconds
 test     |
-test     | > http-server@1.0.0 start /usr/src/test
-test     | > node server.js
+test     | > test@1.0.0 start /usr/src/test
+test     | > node test.js
 test     |
 test     | Database created!
 test exited with code 0
