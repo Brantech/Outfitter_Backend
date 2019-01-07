@@ -1,3 +1,12 @@
+'''
+
+main.py
+
+@author Daquaris Chadwick
+
+To Run: python main.py [--train] 
+
+'''
 # Set up matplotlib
 import matplotlib as mpl
 

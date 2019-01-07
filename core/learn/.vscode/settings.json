@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "/home/theonewhostands/.virtualenvs/learn-DTxR4nWZ/bin/python"
+    "python.pythonPath": "/home/theonewhostands/.virtualenvs/learn-DTxR4nWZ/bin/python",
+    "python.linting.enabled": false
 }
