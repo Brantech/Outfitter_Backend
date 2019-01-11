@@ -30,3 +30,4 @@ Thumbs.db
 
 # Project directories
 data-db
+db-interface/node_modules/
