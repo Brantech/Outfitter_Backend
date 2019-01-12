@@ -16,6 +16,7 @@ from keras.models import load_model
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 class OutfitterModel:
 
     def __init__(self):
@@ -38,7 +39,14 @@ class OutfitterModel:
         self.test_images = self.test_images / 255.0
 
 
-    def train(self, train_input, train_output):
+    def compile_model(self):
+        self.model.compile(optimizer=tf.train.AdamOptimizer(),
+            loss='sparse_categorical_crossentropy',
+            metrics=['accuracy']
+        )
+
+
+    def train(self, path, train_input, train_output):
         ''' Train predictor '''
 
         # Create the model
@@ -48,21 +56,16 @@ class OutfitterModel:
             keras.layers.Dense(10, activation=tf.nn.softmax)
         ])
 
-        self.model.compile(optimizer=tf.train.AdamOptimizer(),
-            loss='sparse_categorical_crossentropy',
-            metrics=['accuracy']
-        )
+        self.compile_model()
 
         self.model.fit(train_input, train_output, epochs=5)
+        #self.model.save(path)
+    
+    def predict(self, test_data):
+        test_image, test_label = test_data
+        
+        test_image = (np.expand_dims(test_image, 0))
+        prediction = self.model.predict(test_image)
+        pred = np.argmax(prediction[0])
 
-
-    def test(self):
-        try:
-            test_loss, test_acc = self.model.evaluate(self.test_images, self.test_labels)
-            print('Test Accuracy: ', test_acc)
-
-            predictions = self.model.predict(self.test_images)
-            pred = np.argmax(predictions[0])
-            print('corr: %s - pred: %s' % (self.test_labels[0], pred))
-        except Exception as err:
-            print('Unable to run at this time. \n' + err)
+        print('corr: %s - pred: %s'%(self.class_names[test_label], self.class_names[pred]))
