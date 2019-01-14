@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
+app.use(cors());
+app.options('*', cors());
 
 // Import routes from routes.js
 let apiRoutes = require("./api/routes");
