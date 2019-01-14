@@ -1,16 +1,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
-// Initialize the app
 const app = express();
 
 // Import routes from routes.js
-let apiRoutes = require("./routes");
+let apiRoutes = require("./api/routes");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/api', apiRoutes);
+app.use(cors());
+app.options('*', cors());
 
 // Connect to MongoDB using docker image
 mongoose

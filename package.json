@@ -1,0 +1,29 @@
+{
+  "name": "outfittr",
+  "version": "1.0.0",
+  "description": "Outfittr Backend Swaggerfied",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "swagger project test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Brantech/Outfitter_Backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Brantech/Outfitter_Backend/issues"
+  },
+  "homepage": "https://github.com/Brantech/Outfitter_Backend#readme",
+  "dependencies": {
+    "bcryptjs": "2.4.3",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "mongoose": "5.2.7",
+    "swagger-express-mw": "^0.7.0"
+  },
+  "devDependencies": {
+    "should": "^7.1.0",
+    "supertest": "^1.0.0"
+  }
+}

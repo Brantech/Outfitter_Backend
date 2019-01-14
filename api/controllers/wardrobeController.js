@@ -1,9 +1,9 @@
 // Import garment model
-Garment = require('./garmentModel');
+Wardrobe = require('./../mocks/wardrobeModel');
 
 // Handle index actions
 exports.index = (req, res) => {
-    Garment.get((err, garments) => {
+    Wardrobe.get((err, wardrobes) => {
         if (err) {
             res.json({
                 status: "error",
@@ -12,21 +12,18 @@ exports.index = (req, res) => {
         }
         res.json({
             status: "success",
-            message: "Garments retrieved successfully",
-            data: garments
+            message: "User's garments retrieved successfully",
+            data: wardrobes
         });
     });
 };
 
 // Handle create garment actions
 exports.new = (req, res) => {
-    var garment = new Garment();
-    garment.name = req.body.name ? req.body.name : garment.name;
-    garment.color = req.body.color;
-    garment.fabric = req.body.fabric;
-    garment.pattern = req.body.pattern;
+    var wardrobe = new Wardrobe();
+    wardrobe.owner_id = req.body.owner_id; // = cookies
     // Save the garment and check for errors
-    garment.save((err) => {
+    wardrobe.save((err) => {
         if (err) {
             res.json({
                 status: "error",
@@ -34,44 +31,41 @@ exports.new = (req, res) => {
             });
         }
         res.json({
-            message: 'New garment created!',
-            data: garment
+            message: 'New wardrobe item created!',
+            data: wardrobe
         });
     });
 };
 
 // Handle view garment info
 exports.view = (req, res) => {
-    Garment.findById(req.params.garment_id, (err, garment) => {
+    Wardrobe.findById(req.params.wardrobe_id, (err, wardrobe) => {
         if (err) {
             res.send(err);
         }
         res.json({
-            message: 'Garment details loading...',
-            data: garment
+            message: 'Wardrobe details loading...',
+            data: wardrobe
         });
     });
 };
 
 // Handle update garment info
 exports.update = (req, res) => {
-    Garment.findById(req.params.garment_id, (err, garment) => {
+    Wardrobe.findById(req.params.wardrobe_id, (err, wardrobe) => {
         if (err) {
             res.send(err);
         }
-        garment.name = req.body.name ? req.body.name : garment.name;
-        garment.color = req.body.color;
-        garment.fabric = req.body.fabric;
-        garment.pattern = req.body.pattern;
+        wardrobe.owner_id = req.body.owner_id; // = cookies
 
         // save the garment and check for errors
-        garment.save((err) => {
+        wardrobe.save((err) => {
             if (err) {
                 res.json(err);
             }
             res.json({
-                message: 'Garment Info updated',
-                data: garment
+                message: 'Wardrobe Info updated',
+                data: wardrobe
             });
         });
     });
@@ -79,7 +73,7 @@ exports.update = (req, res) => {
 
 // Handle delete garment
 exports.delete = (req, res) => {
-    Garment.remove({ _id: req.params.garment_id }, (err, garment) => {
+    Wardrobe.remove({ _id: req.params.wardrobe_id }, (err, wardrobe) => {
         if (err) {
             res.send(err);
         }

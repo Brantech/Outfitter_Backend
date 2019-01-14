@@ -1,5 +1,5 @@
 // Import user model
-User = require('./userModel');
+User = require('./../mocks/userModel');
 var bcryptjs = require('bcryptjs');
 // For password hash
 const saltRounds = 10;

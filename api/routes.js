@@ -1,4 +1,4 @@
-// Filename: api-routes.js
+// Filename: routes.js
 
 // Initialize express router
 let router = require('express').Router();
@@ -12,7 +12,7 @@ router.get('/', (req, res) =>
 });
 
 // Import Garment controller
-var garmentController = require('./garmentController');
+var garmentController = require('./controllers/garmentController');
 
 // Garment routes
 router.route('/garments')
@@ -26,7 +26,7 @@ router.route('/garments/:garment_id')
     .delete(garmentController.delete);
 
 // Import Garment controller
-var userController = require('./userController');
+var userController = require('./controllers/userController');
 
 // Garment routes
 router.route('/users')
@@ -38,6 +38,20 @@ router.route('/users/:user_id')
     .patch(userController.update)
     .put(userController.update)
     .delete(userController.delete);
+
+// Import Garment controller
+var wardrobeController = require('./controllers/wardrobeController');
+
+// Garment routes
+router.route('/wardrobe')
+    .get(wardrobeController.index)
+    .post(wardrobeController.new);
+
+router.route('/wardrobe/:wardrobe_id')
+    .get(wardrobeController.view)
+    .patch(wardrobeController.update)
+    .put(wardrobeController.update)
+    .delete(wardrobeController.delete);
 
 // Export API routes
 module.exports = router;
