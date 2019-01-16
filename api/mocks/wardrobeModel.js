@@ -1,13 +1,17 @@
 var mongoose = require('mongoose');
 
 // Setup schema
-var wardrobeSchema = mongoose.Schema({
+var wardrobeItemSchema = mongoose.Schema({
     unavailable: {
         type: Boolean,
         default: false
     },
     owner_id: {
         type: String
+    },
+    garment_id: {
+        type: String,
+        required: true
     },
     reserveDate: {
         type: Date,
@@ -26,7 +30,7 @@ var wardrobeSchema = mongoose.Schema({
 });
 
 // Export Wardrobe model
-var Wardrobe = module.exports = mongoose.model('warment', wardrobeSchema);
+var WardrobeItem = module.exports = mongoose.model('wardrobeItem', wardrobeItemSchema);
 module.exports.get = (callback, limit) => {
-    Wardrobe.find(callback).limit(limit);
+    WardrobeItem.find(callback).limit(limit);
 }

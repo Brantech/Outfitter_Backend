@@ -2,23 +2,13 @@ var mongoose = require('mongoose');
 
 // Setup schema
 var garmentSchema = mongoose.Schema({
-    name: {
+    type: {
         type: String,
         required: true
     },
-    color: {
+    imageLink: {
         type: String,
         required: true
-    },
-    fabric: {
-        type: String
-    },
-    pattern: {
-        type: String
-    },
-    create_date: {
-        type: Date,
-        default: Date.now
     }
 });
 

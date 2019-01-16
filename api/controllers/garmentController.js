@@ -2,7 +2,7 @@
 Garment = require('./../mocks/garmentModel');
 
 // Handle index actions
-exports.index = (req, res) => {
+exports.indexGarments = (req, res) => {
     Garment.get((err, garments) => {
         if (err) {
             res.json({
@@ -11,20 +11,16 @@ exports.index = (req, res) => {
             });
         }
         res.json({
-            status: "success",
-            message: "Garments retrieved successfully",
-            data: garments
+            garments
         });
     });
 };
 
 // Handle create garment actions
-exports.new = (req, res) => {
+exports.newGarment = (req, res) => {
     var garment = new Garment();
-    garment.name = req.body.name ? req.body.name : garment.name;
-    garment.color = req.body.color;
-    garment.fabric = req.body.fabric;
-    garment.pattern = req.body.pattern;
+    garment.type = req.body.type ? req.body.type : garment.type;
+    garment.imageLink = req.body.imageLink;
     // Save the garment and check for errors
     garment.save((err) => {
         if (err) {
@@ -41,7 +37,7 @@ exports.new = (req, res) => {
 };
 
 // Handle view garment info
-exports.view = (req, res) => {
+exports.viewGarment = (req, res) => {
     Garment.findById(req.params.garment_id, (err, garment) => {
         if (err) {
             res.send(err);
@@ -54,15 +50,13 @@ exports.view = (req, res) => {
 };
 
 // Handle update garment info
-exports.update = (req, res) => {
+exports.updateGarment = (req, res) => {
     Garment.findById(req.params.garment_id, (err, garment) => {
         if (err) {
             res.send(err);
         }
-        garment.name = req.body.name ? req.body.name : garment.name;
-        garment.color = req.body.color;
-        garment.fabric = req.body.fabric;
-        garment.pattern = req.body.pattern;
+        garment.type = req.body.type ? req.body.type : garment.type;
+        garment.imageLink = req.body.imageLink;
 
         // save the garment and check for errors
         garment.save((err) => {
@@ -78,7 +72,7 @@ exports.update = (req, res) => {
 };
 
 // Handle delete garment
-exports.delete = (req, res) => {
+exports.deleteGarment = (req, res) => {
     Garment.remove({ _id: req.params.garment_id }, (err, garment) => {
         if (err) {
             res.send(err);

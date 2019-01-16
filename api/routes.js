@@ -16,42 +16,42 @@ var garmentController = require('./controllers/garmentController');
 
 // Garment routes
 router.route('/garments')
-    .get(garmentController.index)
-    .post(garmentController.new);
+    .get(garmentController.indexGarments)
+    .post(garmentController.newGarment);
 
 router.route('/garments/:garment_id')
-    .get(garmentController.view)
-    .patch(garmentController.update)
-    .put(garmentController.update)
-    .delete(garmentController.delete);
+    .get(garmentController.viewGarment)
+    .patch(garmentController.updateGarment)
+    .put(garmentController.updateGarment)
+    .delete(garmentController.deleteGarment);
 
 // Import Garment controller
 var userController = require('./controllers/userController');
 
 // Garment routes
 router.route('/users')
-    .get(userController.index)
-    .post(userController.new);
+    .get(userController.indexUsers)
+    .post(userController.newUser);
 
 router.route('/users/:user_id')
-    .get(userController.view)
-    .patch(userController.update)
-    .put(userController.update)
-    .delete(userController.delete);
+    .get(userController.viewUser)
+    .patch(userController.updateUser)
+    .put(userController.updateUser)
+    .delete(userController.deleteUser);
 
 // Import Garment controller
 var wardrobeController = require('./controllers/wardrobeController');
 
 // Garment routes
 router.route('/wardrobe')
-    .get(wardrobeController.index)
-    .post(wardrobeController.new);
+    .get(wardrobeController.indexWardrobeItems)
+    .post(wardrobeController.newWardrobeItem);
 
-router.route('/wardrobe/:wardrobe_id')
-    .get(wardrobeController.view)
-    .patch(wardrobeController.update)
-    .put(wardrobeController.update)
-    .delete(wardrobeController.delete);
+router.route('/wardrobeItem/:wardrobeItem_id')
+    .get(wardrobeController.viewWardrobeItem)
+    .patch(wardrobeController.updateWardrobeItem)
+    .put(wardrobeController.updateWardrobeItem)
+    .delete(wardrobeController.deleteWardrobeItem);
 
 // Export API routes
 module.exports = router;

@@ -5,7 +5,7 @@ var bcryptjs = require('bcryptjs');
 const saltRounds = 10;
 
 // Handle index actions
-exports.index = (req, res) => {
+exports.indexUsers = (req, res) => {
     User.get((err, users) => {
         if (err) {
             res.json({
@@ -14,18 +14,19 @@ exports.index = (req, res) => {
             });
         }
         res.json({
-            status: "success",
-            message: "Users retrieved successfully",
-            data: users
+            users
         });
     });
 };
 
 // Handle create user actions
-exports.new = (req, res) => {
+exports.newUser = (req, res) => {
     var user = new User();
-    user.name = req.body.name ? req.body.name : user.name;
-    user.password = req.body.password;    
+    user.username = req.body.username ? req.body.username : user.username;
+    user.firstName = req.body.firstName
+    user.lastName = req.body.lastName;
+    user.email = req.body.email;
+    user.password = req.body.password; 
 
     // Save the user and check for errors
     user.save((err) => {
@@ -36,33 +37,34 @@ exports.new = (req, res) => {
             });
         }
         res.json({
-            message: 'New user created!',
-            data: user
+            user
         });
     });
 };
 
 // Handle view user info
-exports.view = (req, res) => {
+exports.viewUser = (req, res) => {
     User.findById(req.params.user_id, (err, user) => {
         if (err) {
             res.send(err);
         }
         res.json({
-            message: 'User details loading...',
-            data: user
+            user
         });
     });
 };
 
 // Handle update user info
-exports.update = (req, res) => {
+exports.updateUser = (req, res) => {
     User.findById(req.params.user_id, (err, user) => {
         if (err) {
             res.send(err);
         }
-        user.name = req.body.name ? req.body.name : user.name;
-        user.password = req.body.password;
+        user.username = req.body.username ? req.body.username : user.username;
+        user.firstName = req.body.firstName
+        user.lastName = req.body.lastName;
+        user.email = req.body.email;
+        user.password = req.body.password; 
 
         // save the user and check for errors
         user.save((err) => {
@@ -78,7 +80,7 @@ exports.update = (req, res) => {
 };
 
 // Handle delete user
-exports.delete = (req, res) => {
+exports.deleteUser = (req, res) => {
     User.remove({ _id: req.params.user_id }, (err, user) => {
         if (err) {
             res.send(err);
