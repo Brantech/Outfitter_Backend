@@ -1,11 +1,9 @@
 // Import user model
-User = require('./../mocks/userModel');
-var bcryptjs = require('bcryptjs');
-// For password hash
-const saltRounds = 10;
+User = require('./../models/userModel');
+
 
 // Handle index actions
-exports.indexUsers = (req, res) => {
+exports.index = (req, res) => {
     User.get((err, users) => {
         if (err) {
             res.json({
@@ -13,20 +11,24 @@ exports.indexUsers = (req, res) => {
                 message: err,
             });
         }
-        res.json({
-            users
-        });
+        else {
+            res.json({
+                status: "success",
+                message: "Users retrieved successfully",
+                data: users
+            });
+        }
     });
 };
 
 // Handle create user actions
-exports.newUser = (req, res) => {
+exports.new = (req, res) => {
     var user = new User();
-    user.username = req.body.username ? req.body.username : user.username;
-    user.firstName = req.body.firstName
+    user.firstName = req.body.firstName;
     user.lastName = req.body.lastName;
+    user.username = req.body.username;
+    user.password = req.body.password;
     user.email = req.body.email;
-    user.password = req.body.password; 
 
     // Save the user and check for errors
     user.save((err) => {
@@ -36,58 +38,82 @@ exports.newUser = (req, res) => {
                 message: err,
             });
         }
-        res.json({
-            user
-        });
+        else {
+            res.json({
+                message: 'New user created!',
+                data: user
+            });
+        }
     });
 };
 
 // Handle view user info
-exports.viewUser = (req, res) => {
+exports.view = (req, res) => {
     User.findById(req.params.user_id, (err, user) => {
         if (err) {
-            res.send(err);
+            res.json({
+                status: "error",
+                message: err,
+            });
         }
-        res.json({
-            user
-        });
+        else {
+            res.json({
+                message: 'User details loading...',
+                data: user
+            });
+        }
     });
 };
 
 // Handle update user info
-exports.updateUser = (req, res) => {
+exports.update = (req, res) => {
     User.findById(req.params.user_id, (err, user) => {
         if (err) {
-            res.send(err);
-        }
-        user.username = req.body.username ? req.body.username : user.username;
-        user.firstName = req.body.firstName
-        user.lastName = req.body.lastName;
-        user.email = req.body.email;
-        user.password = req.body.password; 
-
-        // save the user and check for errors
-        user.save((err) => {
-            if (err) {
-                res.json(err);
-            }
             res.json({
-                message: 'User Info updated',
-                data: user
+                status: "error",
+                message: err,
             });
-        });
+        }
+        else {
+            user.firstName = req.body.firstName;
+            user.lastName = req.body.lastName;
+            user.username = req.body.username;
+            user.password = req.body.password;
+            user.email = req.body.email;
+    
+            // save the user and check for errors
+            user.save((err) => {
+                if (err) {
+                    res.json({
+                        status: "error",
+                        message: err,
+                    });
+                }
+                else {
+                    res.json({
+                        message: 'User Info updated',
+                        data: user
+                    });
+                }
+            });
+        }
     });
 };
 
 // Handle delete user
-exports.deleteUser = (req, res) => {
+exports.delete = (req, res) => {
     User.remove({ _id: req.params.user_id }, (err, user) => {
         if (err) {
-            res.send(err);
+            res.json({
+                status: "error",
+                message: err,
+            });
         }
-        res.json({
-            status: "success",
-            message: 'User deleted'
-        });
+        else {
+            res.json({
+                status: "success",
+                message: 'User deleted'
+            });
+        }
     });
 };

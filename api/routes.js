@@ -5,53 +5,65 @@ let router = require('express').Router();
 
 // Default API response
 router.get('/', (req, res) => 
-    {res.json({
-        status: 'API is working!',
-        message: 'Welcome to Outfittr',
-    });
-});
+    {
+        res.json({
+            status: 'API is working!',
+            message: 'Welcome to Outfittr',
+        });
+    }
+);
 
-// Import Garment controller
+// Import Controllers
 var garmentController = require('./controllers/garmentController');
+var userController = require('./controllers/userController');
+var wardrobeController = require('./controllers/wardrobeController');
+
+
 
 // Garment routes
 router.route('/garments')
-    .get(garmentController.indexGarments)
-    .post(garmentController.newGarment);
+    .get(garmentController.index)
+    .post(garmentController.new);
 
 router.route('/garments/:garment_id')
-    .get(garmentController.viewGarment)
-    .patch(garmentController.updateGarment)
-    .put(garmentController.updateGarment)
-    .delete(garmentController.deleteGarment);
+    .get(garmentController.view)
+    .patch(garmentController.update)
+    .put(garmentController.update)
+    .delete(garmentController.delete);
 
-// Import Garment controller
-var userController = require('./controllers/userController');
+router.route('/garmentcombos')
+    .get(garmentController.combine);
 
-// Garment routes
+
+
+// User routes
 router.route('/users')
-    .get(userController.indexUsers)
-    .post(userController.newUser);
+    .get(userController.index)
+    .post(userController.new);
 
 router.route('/users/:user_id')
-    .get(userController.viewUser)
-    .patch(userController.updateUser)
-    .put(userController.updateUser)
-    .delete(userController.deleteUser);
+    .get(userController.view)
+    .patch(userController.update)
+    .put(userController.update)
+    .delete(userController.delete);
 
-// Import Garment controller
-var wardrobeController = require('./controllers/wardrobeController');
 
-// Garment routes
-router.route('/wardrobe')
-    .get(wardrobeController.indexWardrobeItems)
-    .post(wardrobeController.newWardrobeItem);
 
-router.route('/wardrobeItem/:wardrobeItem_id')
-    .get(wardrobeController.viewWardrobeItem)
-    .patch(wardrobeController.updateWardrobeItem)
-    .put(wardrobeController.updateWardrobeItem)
-    .delete(wardrobeController.deleteWardrobeItem);
+// Wardrobe routes
+router.route('/wardrobe/:user_id')
+    .get(wardrobeController.index)
+    .post(wardrobeController.new);
+
+router.route('/wardrobe/update/:wardrobe_id')
+    .get(wardrobeController.view)
+    .patch(wardrobeController.update)
+    .put(wardrobeController.update)
+    .delete(wardrobeController.delete);
+
+router.route('/wardrobe/wardrobecombos/:user_id')
+    .get(wardrobeController.combine);
+
+
 
 // Export API routes
 module.exports = router;
