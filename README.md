@@ -1,6 +1,7 @@
 To test, run 'docker-compose build' at the root, and then 'docker-compose up'
 
 Routes for testing:
+
     - /garments                         - GET, POST
     - /garments/:garment_id             - GET, PATCH, PUT, DELETE
     - /garmentcombos                    - GET
