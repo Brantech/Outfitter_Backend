@@ -1,6 +1,9 @@
 // Import user model
 User = require('./../models/userModel');
 
+// Authentication
+let jwt = require('jsonwebtoken');
+let jwkToPem = require('jwk-to-pem');
 
 // Handle index actions
 exports.index = (req, res) => {
@@ -49,20 +52,25 @@ exports.new = (req, res) => {
 
 // Handle view user info
 exports.view = (req, res) => {
-    User.findById(req.params.user_id, (err, user) => {
-        if (err) {
-            res.json({
-                status: "error",
-                message: err,
-            });
-        }
-        else {
-            res.json({
-                message: 'User details loading...',
-                data: user
-            });
-        }
+    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+        console.log(decoded);
+        res.send(decoded)
     });
+
+    // User.findById(req.params.user_id, (err, user) => {
+    //     if (err) {
+    //         res.json({
+    //             status: "error",
+    //             message: err,
+    //         });
+    //     }
+    //     else {
+    //         res.json({
+    //             message: 'User details loading...',
+    //             data: user
+    //         });
+    //     }
+    // });
 };
 
 // Handle update user info
