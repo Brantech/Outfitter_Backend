@@ -6,6 +6,8 @@ learn.py
 
 The core learning class.
 
+MAKE THIS FASTER!!!!
+
 '''
 # TensorFlow and tf.keras
 import matplotlib.pyplot as plt
@@ -89,7 +91,8 @@ class OutfitterModel:
                 accuracy = (sess.run(accuracy, feed_dict={x: self.train_images, y_: self.train_labels}))
                 accuracy_history.append(accuracy)
 
-                print('epoch: ', epoch, ' - ', 'cost: ', cost, ' - MSE: ', mse_, ' - Train Accuracy: ', accuracy)
+                if epoch % 50 == 0:
+                    print('epoch: ', epoch, ' - ', 'cost: ', cost, ' - MSE: ', mse_, ' - Train Accuracy: ', accuracy)
 
             #save_path = saver.save(sess, model_path)
             plt.plot(mse_history, 'r')
@@ -104,17 +107,6 @@ class OutfitterModel:
             pred_y = sess.run(y, feed_dict={x: test_input})
             mse = tf.reduce_mean(tf.square(pred_y - test_output))
             print("MSE: %.4f"%sess.run(mse))
-        # # Create the model
-        # self.model = keras.Sequential([
-        #     keras.layers.Flatten(input_shape=(28, 28)),
-        #     keras.layers.Dense(128, activation=tf.nn.relu),
-        #     keras.layers.Dense(10, activation=tf.nn.softmax)
-        # ])
-
-        # self.compile_model()
-
-        # self.model.fit(train_input, train_output, epochs=5)
-        # #self.model.save(path)
 
     def multilayer_perceptron(self, x, weights, biases):
         layer_1 = tf.add(tf.matmul(x, weights['h1']), biases['b1'])
@@ -123,18 +115,3 @@ class OutfitterModel:
         out_layer = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
         out_layer = tf.nn.softmax(out_layer)
         return out_layer
-
-    # def compile_model(self):
-    #     self.model.compile(optimizer=tf.train.AdamOptimizer(),
-    #         loss='sparse_categorical_crossentropy',
-    #         metrics=['accuracy']
-    #     )
-    
-    # def predict(self, test_data):
-    #     test_image, test_label = test_data
-        
-    #     test_image = (np.expand_dims(test_image, 0))
-    #     prediction = self.model.predict(test_image)
-    #     pred = np.argmax(prediction[0])
-
-    #     print('corr: %s - pred: %s'%(self.class_names[test_label], self.class_names[pred]))
