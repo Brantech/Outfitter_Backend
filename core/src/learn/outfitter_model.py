@@ -63,16 +63,19 @@ class OutfitterModel:
         outfitModel = OutfitterModel()
         (test_in, test_out) = test_data
 
-        final_feature_vector = []
+        list_feature_vector = np.empty((0, 200704), float)
         for outfit in train_input:
-            final_feature_vector = np.concatenate((final_feature_vector, outfitModel.process_outfit(outfit)))
+            list_feature_vector = np.append(list_feature_vector, [np.asarray(outfitModel.process_outfit(outfit))], axis=0)
 
-        model = outfitModel.create_multilayer_perceptron(final_feature_vector.shape, len(classes))
+        model = outfitModel.create_multilayer_perceptron(list_feature_vector[0].shape, len(classes))
         sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
         model.compile(loss='categorical_crossentropy',
                     optimizer=sgd,
                     metrics=['accuracy'])
-        model.fit(final_feature_vector, np.asarray(train_output),  epochs=5, batch_size=1)
+        model.fit(list_feature_vector, np.asarray(train_output),  epochs=20, batch_size=1)
 
-        test = model.evaluate(test_in, test_out)
+        list_feature_vector = np.empty((0, 200704), float)
+        for outfit in test_in:
+            list_feature_vector = np.append(list_feature_vector, [np.asarray(outfitModel.process_outfit(outfit))], axis=0)
+        test = model.evaluate(list_feature_vector, np.asarray(test_out))
         print(test)
