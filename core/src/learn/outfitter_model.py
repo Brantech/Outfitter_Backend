@@ -13,6 +13,7 @@ MAKE THIS FASTER!!!!
 import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow.layers import Flatten
+from keras.callbacks import TensorBoard
 from keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
 from keras.layers import Dense, Dropout, Activation
 from keras.models import Sequential
@@ -63,6 +64,8 @@ class OutfitterModel:
         outfitModel = OutfitterModel()
         (test_in, test_out) = test_data
 
+        tbcallback = TensorBoard(log_dir='src/', histogram_freq=0, write_graph=True, write_images=True)
+
         list_feature_vector = np.empty((0, 200704), float)
         for outfit in train_input:
             list_feature_vector = np.append(list_feature_vector, [np.asarray(outfitModel.process_outfit(outfit))], axis=0)
@@ -72,7 +75,10 @@ class OutfitterModel:
         model.compile(loss='categorical_crossentropy',
                     optimizer=sgd,
                     metrics=['accuracy'])
-        model.fit(list_feature_vector, np.asarray(train_output),  epochs=20, batch_size=1)
+        model.fit(list_feature_vector, np.asarray(train_output),  
+                epochs=20, 
+                batch_size=1,
+                callbacks=[tbcallback])
 
         list_feature_vector = np.empty((0, 200704), float)
         for outfit in test_in:
