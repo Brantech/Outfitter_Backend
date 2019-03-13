@@ -31,3 +31,4 @@ Thumbs.db
 # Project directories
 data-db
 .vscode/settings.json
+core/src/output/

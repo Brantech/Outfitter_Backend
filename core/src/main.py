@@ -10,6 +10,8 @@ from keras.preprocessing import image
 import numpy as np
 import os
 import re
+import json
+import shelve
 
 def get_images(root_dir):
     result = {'tops': [], 'bottoms': []}
@@ -25,49 +27,40 @@ def get_images(root_dir):
             result[clothing].append((path, filename))
     return result
 
+def extract_all_features(items):
+    model = OutfitterModel()
+    output = {'data': {}}
+
+    for i in clothing_items:
+        output['data'].update({i: []})
+        mapping = {}
+        length = len(clothing_items[i])
+        curr = 0
+
+        if not os.path.exists('output/' + i):
+            os.makedirs('output/' + i)
+
+        print("\n" + i)
+        print("Progress: 0/" + str(length))
+        for j in clothing_items[i]:
+            url_item = j[0]
+            item = image.load_img(url_item, target_size=(224, 224))
+            item = image.img_to_array(item)
+            item = model.get_features(item).flatten().tolist()
+
+            out = open("output/" + i + "/" + str(curr) + ".json", "w")
+            out.write(json.dumps(item))
+            out.close()
+            mapping.update({j[1]: str(curr) + ".json"})
+            
+            curr += 1
+            print("Progress: " + str(curr) + "/" + str(length))
+
+        out = open("output/" + i + "/mappings.json", "w")
+        out.write(json.dumps(mapping))
+        out.close()
+
+
 clothing_items = get_images('data/')
 
-train_input = []
-dataset_num = 5
-for i in range(dataset_num):
-
-    url_top = clothing_items['tops'][i][0]
-    url_bottom = clothing_items['bottoms'][i][0]
-
-    top = image.load_img(url_top, target_size=(224, 224))
-    top = image.img_to_array(top)
-
-    bottom = image.load_img(url_bottom, target_size=(224, 224))
-    bottom = image.img_to_array(bottom)
-
-    outfit = [top, bottom]
-    train_input.append(outfit)
-
-inp = [3, 1, 4, 5, 1]
-train_output = []
-for i in range(dataset_num):
-
-    train_output.append(np.zeros((5,)))
-    train_output[i][inp[i] - 1] = 1
-
-test_input = []
-
-url_top = clothing_items['tops'][5][0]
-url_bottom = clothing_items['bottoms'][5][0]
-
-top = image.load_img(url_top, target_size=(224, 224))
-top = image.img_to_array(top)
-
-bottom = image.load_img(url_bottom, target_size=(224, 224))
-bottom = image.img_to_array(bottom)
-
-outfit = [top, bottom]
-test_input.append(outfit)
-
-test_output = []
-test_output.append(np.zeros((5,)))
-test_output[0][3] = 1
-
-OutfitterModel.train(train_input, train_output, (test_input, test_output))
-
-#print(train_input, train_output, test_input, test_output)
+extract_all_features(clothing_items)

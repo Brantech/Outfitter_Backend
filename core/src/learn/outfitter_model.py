@@ -31,13 +31,15 @@ def parse_labels(labels, label_count=10):
     return np.array(ret_array)
 
 class OutfitterModel:
-    def get_features(self, x):
+    def __init__(self):
         # Feature Extractor - Test other feature extractors
-        base_model = ResNet50(weights='imagenet', include_top=False)
+        self.base_model = ResNet50(weights='imagenet', include_top=False)
+
+    def get_features(self, x):
         
         x = np.expand_dims(x, axis=0)
         x = preprocess_input(x)
-        return base_model.predict(x)
+        return self.base_model.predict(x)
     
     def process_outfit(self, images):
         feature_vector_final = None
