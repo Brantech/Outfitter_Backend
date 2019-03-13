@@ -33,7 +33,6 @@ def extract_all_features(items):
 
     for i in clothing_items:
         output['data'].update({i: []})
-        mapping = {}
         length = len(clothing_items[i])
         curr = 0
 
@@ -48,19 +47,25 @@ def extract_all_features(items):
             item = image.img_to_array(item)
             item = model.get_features(item).flatten().tolist()
 
-            out = open("output/" + i + "/" + str(curr) + ".json", "w")
+            out = open("output/" + i + "/" + str(j[1]) + ".json", "w")
             out.write(json.dumps(item))
             out.close()
-            mapping.update({j[1]: str(curr) + ".json"})
             
             curr += 1
             print("Progress: " + str(curr) + "/" + str(length))
 
-        out = open("output/" + i + "/mappings.json", "w")
-        out.write(json.dumps(mapping))
-        out.close()
+def get_features(surveyDataItem):
+    retVal = []
+
+    for i in surveyDataItem["createdOutfit"]:
+        mapping = json.load(open("output/" + i.lower() + "/mappings.json"))
+
+        retVal.append(json.load(open("output/" + i.lower() + "/" + mapping[surveyDataItem["createdOutfit"][i]])))
+
+    return retVal
 
 
 clothing_items = get_images('data/')
-
 extract_all_features(clothing_items)
+
+# data = json.load(open("data/data.json"))
