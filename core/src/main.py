@@ -28,7 +28,7 @@ def get_images(root_dir):
 clothing_items = get_images('data/')
 
 train_input = []
-dataset_num = 5
+dataset_num = 2
 for i in range(dataset_num):
 
     url_top = clothing_items['tops'][i][0]
@@ -41,7 +41,7 @@ for i in range(dataset_num):
     bottom = image.img_to_array(bottom)
 
     outfit = [top, bottom]
-    train_input.append(outfit)
+    train_input.append((outfit, [1, 2, 3, 4]))
 
 inp = [3, 1, 4, 5, 1]
 train_output = []
@@ -68,6 +68,4 @@ test_output = []
 test_output.append(np.zeros((5,)))
 test_output[0][3] = 1
 
-OutfitterModel.train(train_input, train_output, (test_input, test_output))
-
-#print(train_input, train_output, test_input, test_output)
+OutfitterModel.train((train_input, train_output))
