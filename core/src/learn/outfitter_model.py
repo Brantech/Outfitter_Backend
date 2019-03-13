@@ -40,6 +40,15 @@ class OutfitterModel:
         x = np.expand_dims(x, axis=0)
         x = preprocess_input(x)
         return self.base_model.predict(x)
+
+    def process_outfit_features(self, outfit_features):
+        feature_vector_final = None
+        for feature in outfit_features:
+            if feature_vector_final is None:
+                feature_vector_final = feature
+            else:
+                feature_vector_final = np.concatenate((feature_vector_final, feature), axis=None)
+        return np.asarray(feature_vector_final)
     
     def process_outfit(self, images):
         feature_vector_final = None
@@ -62,28 +71,33 @@ class OutfitterModel:
         return model
 
     @staticmethod
-    def train(train_input, train_output, test_data, classes=[1, 2, 3, 4, 5]):
+    def train(train_data, classes=[1, 2, 3, 4, 5]):
         outfitModel = OutfitterModel()
-        (test_in, test_out) = test_data
+
+        (train_input, train_output) = train_data
 
         tbcallback = TensorBoard(log_dir='src/', histogram_freq=0, write_graph=True, write_images=True)
 
-        list_feature_vector = np.empty((0, 200704), float)
-        for outfit in train_input:
-            list_feature_vector = np.append(list_feature_vector, [np.asarray(outfitModel.process_outfit(outfit))], axis=0)
+        input_vector = np.empty((0, 200708), float)
+        for (outfit_features, environment) in train_input:
+            feature_vector = outfitModel.process_outfit_features(outfit_features)
+            #feature_vector = outfitModel.process_outfit(outfit_features)
+            input_vector = np.append(input_vector, [np.concatenate((feature_vector, [np.asarray(environment)]), axis=None)], axis=0)
 
-        model = outfitModel.create_multilayer_perceptron(list_feature_vector[0].shape, len(classes))
+        model = outfitModel.create_multilayer_perceptron(input_vector[0].shape, len(classes))
         sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
         model.compile(loss='categorical_crossentropy',
                     optimizer=sgd,
                     metrics=['accuracy'])
-        model.fit(list_feature_vector, np.asarray(train_output),  
+        model.fit(input_vector, np.asarray(train_output),  
                 epochs=20, 
                 batch_size=1,
                 callbacks=[tbcallback])
 
-        list_feature_vector = np.empty((0, 200704), float)
-        for outfit in test_in:
-            list_feature_vector = np.append(list_feature_vector, [np.asarray(outfitModel.process_outfit(outfit))], axis=0)
-        test = model.evaluate(list_feature_vector, np.asarray(test_out))
-        print(test)
+        return model
+    
+    @staticmethod
+    def test(model, test_data):
+        (test_input, test_output) = test_data
+        return
+
