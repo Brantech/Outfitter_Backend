@@ -1,5 +1,6 @@
 // Import garment model
 Garment = require('./../models/garmentModel');
+Wardrobe = require('./../models/wardrobeModel');
 
 // Handle index actions
 exports.index = (req, res) => {
@@ -63,20 +64,38 @@ exports.new = (req, res) => {
     garment.type = req.body.type;
     garment.imageLink = req.body.imageLink;
     // Save the garment and check for errors
-    garment.save((err) => {
-        if (err) {
+    Garment.find({
+        imageLink : req.body.imageLink
+    }).exec((err, garments) => {
+        if(err) {
             res.json({
                 status: "error",
                 message: err,
             });
         }
-        else {
+        else if(garments.length) {
             res.json({
-                message: 'New garment created!',
-                data: garment
+                status: "failed",
+                message: "Garment already exists.",
             });
         }
-    });
+        else {
+            garment.save((err) => {
+                if (err) {
+                    res.json({
+                        status: "error",
+                        message: err,
+                    });
+                }
+                else {
+                    res.json({
+                        message: 'New garment created!',
+                        data: garment
+                    });
+                }
+            });
+        }
+    })
 };
 
 // Handle view garment info
@@ -107,9 +126,12 @@ exports.update = (req, res) => {
             });
         }
         else {
-            garment.type = req.body.type;
-            garment.imageLink = req.body.imageLink;
-    
+            if(req.body.type) {
+                garment.type = req.body.type;
+            }
+            if(req.body.imageLink) {
+                garment.imageLink = req.body.imageLink;
+            }
             // save the garment and check for errors
             garment.save((err) => {
                 if (err) {
@@ -131,18 +153,58 @@ exports.update = (req, res) => {
 
 // Handle delete garment
 exports.delete = (req, res) => {
-    Garment.remove({ _id: req.params.garment_id }, (err, garment) => {
-        if (err) {
+    Garment.find({ _id: req.params.garment_id}, (err, garment) => {
+        if(!garment.length) {
+            res.json({
+                status: "failed",
+                message: "This garment does not exist."
+            });
+        }
+        else if(err) {
             res.json({
                 status: "error",
-                message: err,
+                message: err
+            });
+        }
+        else if(garment.length) {
+            Garment.remove({ _id: req.params.garment_id }, (err) => {
+                if (err) {
+                    res.json({
+                        status: "error",
+                        message: err,
+                    });
+                }
+                else {
+                    Wardrobe.find({garment_id: req.params.garment_id}, (err, garms) => {
+                        if(garms.length) {
+                            Wardrobe.remove({ garment_id: req.params.garment_id} , (err) => {
+                                if(err) {
+                                    res.json({
+                                        status: "error",
+                                        message: err
+                                    });
+                                }
+                                res.json({
+                                    status: "success",
+                                    message: 'Garment deleted and removed from all wardrobes'
+                                });
+                            });
+                        }
+                        else {
+                            res.json({
+                                status: "success",
+                                message: 'Garment is deleted, and it does not exist in any wardrobes.'
+                            })
+                        }
+                    })
+                }
             });
         }
         else {
             res.json({
-                status: "success",
-                message: 'Garment deleted'
+                status: "error",
+                message: "An unknown issue has occurred."
             });
         }
-    });
+    })
 };

@@ -1,9 +1,23 @@
-// Import wardrobe model
+// Import wardrobe and garment models
 Wardrobe = require('./../models/wardrobeModel');
 Garment = require('./../models/garmentModel');
+User = require('./../models/userModel');
+
+// Authentication
+let jwt = require('jsonwebtoken');
+let jwkToPem = require('jwk-to-pem');
 
 // Get all combinations
 exports.combine = (req, res) => {
+    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+        if(err) {
+            console.log(err)
+        }
+        else {
+            console.log(decoded);
+            res.send(decoded)
+        }
+    });
     Wardrobe.get((err, wardrobeItems) => {
         if (err) {
             res.json({
@@ -34,7 +48,6 @@ exports.combine = (req, res) => {
                         combos.push([shirts[i], pants[j]]);
                     }
                 }
-    
                 res.json({
                     status: "success",
                     message: "Wardrobe combinations retrieved successfully",
@@ -47,6 +60,15 @@ exports.combine = (req, res) => {
 
 // Get user's wardrobe garments
 exports.index = (req, res) => {
+    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+        if(err) {
+            console.log(err)
+        }
+        else {
+            console.log(decoded);
+            res.send(decoded)
+        }
+    });
     Wardrobe.get((err, wardrobeItems) => {
         if (err) {
             res.json({
@@ -59,11 +81,37 @@ exports.index = (req, res) => {
                 owner_id: req.params.user_id
             })
             .exec((err, wardrobes) => {
-                res.json({
-                    status: "success",
-                    message: "User's garments retrieved successfully",
-                    data: wardrobes
-                });
+                if(wardrobes.length) {
+                    res.json({
+                        status: "success",
+                        message: "User's garments retrieved successfully",
+                        data: wardrobes
+                    });
+                }
+                else {
+                    User.find({
+                        _id: req.params.user_id
+                    }).exec((err, users) => {
+                        if(err) {
+                            res.json({
+                                status: "error",
+                                message: err,
+                            });
+                        }
+                        else if(users.length) {
+                            res.json({
+                                status: "success",
+                                message: "I'm afraid you don't have any clothes in your wardrobe yet :("
+                            });
+                        }
+                        else {
+                            res.json({
+                                status: "success",
+                                message: "There is no account for this user yet."
+                            });
+                        }
+                    });
+                }
             });
         }
     });
@@ -71,23 +119,54 @@ exports.index = (req, res) => {
 
 // Handle create garment actions
 exports.new = (req, res) => {
-    var wardrobeItem = new Wardrobe();
-    wardrobeItem.owner_id = req.params.user_id;
-    wardrobeItem.tags = req.body.tags;
-    wardrobeItem.garment_id = req.body.garment_id;
-    wardrobeItem.type = req.body.type;
-    // Save the garment and check for errors
-    wardrobeItem.save((err) => {
-        if (err) {
-            res.json({
-                status: "error",
-                message: err,
-            });
+    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+        if(err) {
+            console.log(err)
+        }
+        else {
+            console.log(decoded);
+            res.send(decoded)
+        }
+    });
+    Garment.find({_id: req.body.garment_id}, (err, garment) => {
+        if (garment) {
+            Wardrobe.find({garment_id: req.body.garment_id, owner_id: req.params.user_id}, (err, wardrobeitem) => {
+                if(wardrobeitem.length) {
+                    res.json({
+                        status: "Error",
+                        message: "This garment is already in your closet."
+                    });
+                }
+                else {
+                    var wardrobeItem = new Wardrobe();
+                    wardrobeItem.owner_id = req.params.user_id;
+                    wardrobeItem.garment_id = req.body.garment_id;
+                    wardrobeItem.type = garment[0].type;
+                    if(req.body.tags) {
+                        wardrobeItem.tags = req.body.tags;
+                    }
+                    // Save the garment and check for errors
+                    wardrobeItem.save((err) => {
+                        if (err) {
+                            res.json({
+                                status: "error",
+                                message: err,
+                            });
+                        }
+                        else {
+                            res.json({
+                                message: 'New wardrobe item created!',
+                                data: wardrobeItem
+                            });
+                        }
+                    });
+                }
+            });        
         }
         else {
             res.json({
-                message: 'New wardrobe item created!',
-                data: wardrobeItem
+                status: "Error",
+                message: "Garment does not exist in catalog."
             });
         }
     });
@@ -95,6 +174,15 @@ exports.new = (req, res) => {
 
 // Handle view garment info
 exports.view = (req, res) => {
+    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+        if(err) {
+            console.log(err)
+        }
+        else {
+            console.log(decoded);
+            res.send(decoded)
+        }
+    });
     Wardrobe.findById(req.params.wardrobe_id, (err, wardrobeItem) => {
         if (err) {
             res.json({
@@ -113,18 +201,25 @@ exports.view = (req, res) => {
 
 // Handle update garment info
 exports.update = (req, res) => {
-    Wardrobe.findById(req.params.wardrobe_id, (err, wardrobeItem) => {
-        if (err) {
-            res.json({
-                status: "error",
-                message: err,
-            });
+    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+        if(err) {
+            console.log(err)
         }
         else {
-            wardrobeItem.tags = req.body.tags;
-            wardrobeItem.type = req.body.type;
+            console.log(decoded);
+            res.send(decoded)
+        }
+    });
+    Wardrobe.find({owner_id: req.params.user_id, garment_id: req.params.garment_id}, (err, wardrobeItem) => {
+        if(wardrobeItem.length) {
+            if(req.body.tags) {
+                wardrobeItem[0].tags = req.body.tags;
+            }
+            if(req.body.type) {
+                wardrobeItem[0].type = req.body.type;
+            }
             // save the garment and check for errors
-            wardrobeItem.save((err) => {
+            wardrobeItem[0].save((err) => {
                 if (err) {
                     res.json({
                         status: "error",
@@ -139,13 +234,13 @@ exports.update = (req, res) => {
                 }
             });
         }
-    });
-};
-
-// Handle delete garment
-exports.delete = (req, res) => {
-    Wardrobe.remove({ _id: req.params.wardrobe_id }, (err, wardrobeItem) => {
-        if (err) {
+        else if(!wardrobeItem.length) {
+            res.json({
+                status: "failed",
+                message: "No such item in wardrobe",
+            });
+        }
+        else if (err) {
             res.json({
                 status: "error",
                 message: err,
@@ -153,9 +248,58 @@ exports.delete = (req, res) => {
         }
         else {
             res.json({
-                status: "success",
-                message: 'Garment deleted from wardrobe'
+                status: "unknown",
+                message: "An unknown issue occurred.",
             });
         }
     });
+};
+
+// Handle delete garment
+exports.delete = (req, res) => {
+    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+        if(err) {
+            console.log(err)
+        }
+        else {
+            console.log(decoded);
+            res.send(decoded)
+        }
+    });  
+    Wardrobe.find({owner_id: req.params.user_id, garment_id: req.params.garment_id}, (err, wardrobeItem) => {
+        if(wardrobeItem.length) {
+            Wardrobe.remove({ owner_id: req.params.user_id, garment_id: req.params.garment_id }, (err) => {
+                if (err) {
+                    res.json({
+                        status: "error",
+                        message: err,
+                    });
+                }
+                else {
+                    res.json({
+                        status: "success",
+                        message: 'Garment deleted from wardrobe'
+                    });
+                }
+            });
+        }
+        else if(!wardrobeItem.length) {
+            res.json({
+                status: "failed",
+                message: "No such item in wardrobe",
+            });
+        }
+        else if (err) {
+            res.json({
+                status: "error",
+                message: err,
+            });
+        }
+        else {
+            res.json({
+                status: "unknown",
+                message: "An unknown issue occurred.",
+            });
+        }
+    });   
 };

@@ -54,7 +54,7 @@ router.route('/wardrobe/:user_id')
     .get(wardrobeController.index)
     .post(wardrobeController.new);
 
-router.route('/wardrobe/update/:wardrobe_id')
+router.route('/wardrobe/:user_id/update/:garment_id')
     .get(wardrobeController.view)
     .patch(wardrobeController.update)
     .put(wardrobeController.update)
