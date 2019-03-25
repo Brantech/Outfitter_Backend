@@ -2,19 +2,17 @@ version: "3"
 
 services:
 
-  test:
-    container_name: test
-    build:
-      context: ./
-      dockerfile: ./test/Dockerfile
-    command: ["./docker-scripts/wait-for-it.sh", "mongo:27017", "--", "npm", "start"]
-    depends_on:
+  app:
+    container_name: outfittr
+    restart: always
+    build: .
+    ports:
+      - '3000:3000'
+    links:
       - mongo
-  
+      
   mongo:
     container_name: mongo
     image: mongo
-    volumes:
-      - ./data-db:/data/db
     ports:
       - "27017:27017"
