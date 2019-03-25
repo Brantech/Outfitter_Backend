@@ -1,8 +1,9 @@
 // Import garment model
-Garment = require('./../mocks/garmentModel');
+Garment = require('./../models/garmentModel');
+Wardrobe = require('./../models/wardrobeModel');
 
 // Handle index actions
-exports.indexGarments = (req, res) => {
+exports.index = (req, res) => {
     Garment.get((err, garments) => {
         if (err) {
             res.json({
@@ -10,76 +11,200 @@ exports.indexGarments = (req, res) => {
                 message: err,
             });
         }
-        res.json({
-            garments
-        });
+        else {
+            res.json({
+                status: "success",
+                message: "Garments retrieved successfully",
+                data: garments
+            });
+        }
     });
 };
 
-// Handle create garment actions
-exports.newGarment = (req, res) => {
-    var garment = new Garment();
-    garment.type = req.body.type ? req.body.type : garment.type;
-    garment.imageLink = req.body.imageLink;
-    // Save the garment and check for errors
-    garment.save((err) => {
+// Combine garments
+exports.combine = (req, res) => {
+    Garment.get((err, garments) => {
         if (err) {
             res.json({
                 status: "error",
                 message: err,
             });
         }
-        res.json({
-            message: 'New garment created!',
-            data: garment
-        });
+        else {
+            var shirts = new Array();
+            var pants = new Array();
+            var combos = new Array();
+
+            for(var i = 0; i < garments.length; i++) {
+                if(garments[i].type == 'shirt') {
+                    shirts.push(garments[i]);
+                }
+                if(garments[i].type == 'pants') {
+                    pants.push(garments[i]);
+                }
+            }
+            for(var i = 0; i < shirts.length; i++) {
+                for(var j = 0; j < pants.length; j++) {
+                    combos.push([shirts[i], pants[j]]);
+                }
+            }
+
+            res.json({
+                status: "success",
+                message: "Garment combinations retrieved successfully",
+                data: combos
+            });
+        }
     });
 };
 
+// Handle create garment actions
+exports.new = (req, res) => {
+    var garment = new Garment();
+    garment.type = req.body.type;
+    garment.imageLink = req.body.imageLink;
+    // Save the garment and check for errors
+    Garment.find({
+        imageLink : req.body.imageLink
+    }).exec((err, garments) => {
+        if(err) {
+            res.json({
+                status: "error",
+                message: err,
+            });
+        }
+        else if(garments.length) {
+            res.json({
+                status: "failed",
+                message: "Garment already exists.",
+            });
+        }
+        else {
+            garment.save((err) => {
+                if (err) {
+                    res.json({
+                        status: "error",
+                        message: err,
+                    });
+                }
+                else {
+                    res.json({
+                        message: 'New garment created!',
+                        data: garment
+                    });
+                }
+            });
+        }
+    })
+};
+
 // Handle view garment info
-exports.viewGarment = (req, res) => {
+exports.view = (req, res) => {
     Garment.findById(req.params.garment_id, (err, garment) => {
         if (err) {
-            res.send(err);
+            res.json({
+                status: "error",
+                message: err,
+            });
         }
-        res.json({
-            message: 'Garment details loading...',
-            data: garment
-        });
+        else {
+            res.json({
+                message: 'Garment details loading...',
+                data: garment
+            });
+        }
     });
 };
 
 // Handle update garment info
-exports.updateGarment = (req, res) => {
+exports.update = (req, res) => {
     Garment.findById(req.params.garment_id, (err, garment) => {
         if (err) {
-            res.send(err);
-        }
-        garment.type = req.body.type ? req.body.type : garment.type;
-        garment.imageLink = req.body.imageLink;
-
-        // save the garment and check for errors
-        garment.save((err) => {
-            if (err) {
-                res.json(err);
-            }
             res.json({
-                message: 'Garment Info updated',
-                data: garment
+                status: "error",
+                message: err,
             });
-        });
+        }
+        else {
+            if(req.body.type) {
+                garment.type = req.body.type;
+            }
+            if(req.body.imageLink) {
+                garment.imageLink = req.body.imageLink;
+            }
+            // save the garment and check for errors
+            garment.save((err) => {
+                if (err) {
+                    res.json({
+                        status: "error",
+                        message: err,
+                    });
+                }
+                else {
+                    res.json({
+                        message: 'Garment Info updated',
+                        data: garment
+                    });
+                }
+            });
+        }
     });
 };
 
 // Handle delete garment
-exports.deleteGarment = (req, res) => {
-    Garment.remove({ _id: req.params.garment_id }, (err, garment) => {
-        if (err) {
-            res.send(err);
+exports.delete = (req, res) => {
+    Garment.find({ _id: req.params.garment_id}, (err, garment) => {
+        if(!garment.length) {
+            res.json({
+                status: "failed",
+                message: "This garment does not exist."
+            });
         }
-        res.json({
-            status: "success",
-            message: 'Garment deleted'
-        });
-    });
+        else if(err) {
+            res.json({
+                status: "error",
+                message: err
+            });
+        }
+        else if(garment.length) {
+            Garment.remove({ _id: req.params.garment_id }, (err) => {
+                if (err) {
+                    res.json({
+                        status: "error",
+                        message: err,
+                    });
+                }
+                else {
+                    Wardrobe.find({garment_id: req.params.garment_id}, (err, garms) => {
+                        if(garms.length) {
+                            Wardrobe.remove({ garment_id: req.params.garment_id} , (err) => {
+                                if(err) {
+                                    res.json({
+                                        status: "error",
+                                        message: err
+                                    });
+                                }
+                                res.json({
+                                    status: "success",
+                                    message: 'Garment deleted and removed from all wardrobes'
+                                });
+                            });
+                        }
+                        else {
+                            res.json({
+                                status: "success",
+                                message: 'Garment is deleted, and it does not exist in any wardrobes.'
+                            })
+                        }
+                    })
+                }
+            });
+        }
+        else {
+            res.json({
+                status: "error",
+                message: "An unknown issue has occurred."
+            });
+        }
+    })
 };

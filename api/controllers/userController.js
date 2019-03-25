@@ -1,11 +1,13 @@
-// Import user model
-User = require('./../mocks/userModel');
-var bcryptjs = require('bcryptjs');
-// For password hash
-const saltRounds = 10;
+// Import user and wardrobe models
+User = require('./../models/userModel');
+Wardrobe = require('./../models/wardrobeModel');
+
+// Authentication
+let jwt = require('jsonwebtoken');
+let jwkToPem = require('jwk-to-pem');
 
 // Handle index actions
-exports.indexUsers = (req, res) => {
+exports.index = (req, res) => {
     User.get((err, users) => {
         if (err) {
             res.json({
@@ -13,81 +15,151 @@ exports.indexUsers = (req, res) => {
                 message: err,
             });
         }
-        res.json({
-            users
-        });
+        else {
+            res.json({
+                status: "success",
+                message: "Users retrieved successfully",
+                data: users
+            });
+        }
     });
 };
 
 // Handle create user actions
-exports.newUser = (req, res) => {
-    var user = new User();
-    user.username = req.body.username ? req.body.username : user.username;
-    user.firstName = req.body.firstName
-    user.lastName = req.body.lastName;
-    user.email = req.body.email;
-    user.password = req.body.password; 
-
+exports.new = (req, res) => {
+    var newuser = new User();
+    newuser.username = req.body.username;
     // Save the user and check for errors
-    user.save((err) => {
+    newuser.save((err) => {
         if (err) {
             res.json({
                 status: "error",
                 message: err,
             });
         }
-        res.json({
-            user
-        });
+        else {
+            res.json({
+                message: 'New user created!',
+                data: newuser
+            });
+        }
     });
 };
 
 // Handle view user info
-exports.viewUser = (req, res) => {
+exports.view = (req, res) => {
+    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+        if(err) {
+            console.log(err)
+        }
+        else {
+            console.log(decoded);
+            res.send(decoded)
+        }
+    });
+
     User.findById(req.params.user_id, (err, user) => {
         if (err) {
-            res.send(err);
+            res.json({
+                status: "error",
+                message: err,
+            });
         }
-        res.json({
-            user
-        });
+        else {
+            if(user) {
+                res.json({
+                    status: 'success',
+                    message: 'User details loading...',
+                    data: user
+                });
+            }
+            else {
+                res.json({
+                    status: 'success',
+                    message: 'There is no such user in existence.'
+                });
+            }
+        }
     });
 };
 
 // Handle update user info
-exports.updateUser = (req, res) => {
+exports.update = (req, res) => {
+    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+        if(err) {
+            console.log(err)
+        }
+        else {
+            console.log(decoded);
+            res.send(decoded)
+        }
+    });
     User.findById(req.params.user_id, (err, user) => {
         if (err) {
-            res.send(err);
-        }
-        user.username = req.body.username ? req.body.username : user.username;
-        user.firstName = req.body.firstName
-        user.lastName = req.body.lastName;
-        user.email = req.body.email;
-        user.password = req.body.password; 
-
-        // save the user and check for errors
-        user.save((err) => {
-            if (err) {
-                res.json(err);
-            }
             res.json({
-                message: 'User Info updated',
-                data: user
+                status: "error",
+                message: err,
             });
-        });
+        }
+        else {
+            if(req.body.username) {
+                user.username = req.body.username;
+            }
+            // save the user and check for errors
+            user.save((err) => {
+                if (err) {
+                    res.json({
+                        status: "error",
+                        message: err,
+                    });
+                }
+                else {
+                    res.json({
+                        message: 'User Info updated',
+                        data: user
+                    });
+                }
+            });
+        }
     });
 };
 
 // Handle delete user
-exports.deleteUser = (req, res) => {
-    User.remove({ _id: req.params.user_id }, (err, user) => {
-        if (err) {
-            res.send(err);
+exports.delete = (req, res) => {
+    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+        if(err) {
+            console.log(err)
         }
-        res.json({
-            status: "success",
-            message: 'User deleted'
-        });
+        else {
+            console.log(decoded);
+            res.send(decoded)
+        }
+    });
+    User.remove({ _id: req.params.user_id }, (err) => {
+        if (err) {
+            res.json({
+                status: "User delete error",
+                message: err,
+            });
+        }
+        else {
+            Wardrobe.deleteMany({
+                owner_id: req.params.user_id
+            })
+            .exec((err) => {
+                if(err) {
+                    res.json({
+                        status: "Wardrobe delete error",
+                        message: err,
+                    });
+                }
+                else {
+                    res.json({
+                        status: "success",
+                        message: 'User and wardrobe deleted'
+                    });
+                }
+            });
+        }
     });
 };
