@@ -32,15 +32,3 @@ node_modules
 
 # Runtime configuration for swagger app
 config/runtime.yaml
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Project directories
-data-db
-db-interface/node_modules/

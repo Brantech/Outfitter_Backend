@@ -1,20 +1,12 @@
 var mongoose = require('mongoose');
-var bcrypt = require('bcryptjs');
-const saltRounds = 10;
 
 // Setup schema
 var userSchema = mongoose.Schema({
     firstName: {
-        type: String,
-        required: false
+        type: String
     },
     lastName: {
-        type: String,
-        required: false
-    },
-    email: {
-        type: String,
-        required: true
+        type: String
     },
     username: {
         type: String,
@@ -24,22 +16,15 @@ var userSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    email: {
+        type: String,
+        required: true
+    },
     create_date: {
         type: Date,
         default: Date.now
     }
 });
-
-// userSchema.pre('save', (next) => {
-//     var user = this;
-//     bcrypt.hash(user.password, saltRounds, (err, hash) => {
-//         if(err) {
-//             return next(err);
-//         }
-//         user.password = hash;
-//         next();
-//     });
-// });
 
 // Export user model
 var User = module.exports = mongoose.model('user', userSchema);
