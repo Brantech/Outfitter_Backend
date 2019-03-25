@@ -5,6 +5,21 @@
 logs
 *.log
 
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project directories
+data-db
+.vscode/settings.json
+core/src/output/
+core/src/events.out.tfevents.1552445761.theonewhostands-ThinkPad-X1-Carbon-6th
+
 # Runtime data
 pids
 *.pid

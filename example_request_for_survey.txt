@@ -1,0 +1,11 @@
+{
+    "outfitParts": [
+        <filename>, <filename>, <filename>, ...
+    ],
+    "timeOfDay": number,
+    "temparature": number,
+    "weather": number,
+    "rating": number,
+    "sexOfUser": number,
+    "regionOfUser": number or state_id
+}
