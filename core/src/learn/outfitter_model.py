@@ -36,7 +36,6 @@ class OutfitterModel:
         self.base_model = ResNet50(weights='imagenet', include_top=False)
 
     def get_features(self, x):
-        
         x = np.expand_dims(x, axis=0)
         x = preprocess_input(x)
         return self.base_model.predict(x)
@@ -49,55 +48,56 @@ class OutfitterModel:
             else:
                 feature_vector_final = np.concatenate((feature_vector_final, feature), axis=None)
         return np.asarray(feature_vector_final)
-    
-    def process_outfit(self, images):
-        feature_vector_final = None
-        for image in images:
-            image_feature_vector = self.get_features(image).flatten()
-            if feature_vector_final is None:
-                feature_vector_final = image_feature_vector
-            else:
-                feature_vector_final = np.concatenate((feature_vector_final, image_feature_vector), axis=None)
-        return feature_vector_final
 
     def create_multilayer_perceptron(self, input_layer_shape, class_count):
         model = Sequential()
 
-        model.add(Dense(64, activation='relu', input_shape=input_layer_shape))
-        model.add(Dropout(0.5))
-        model.add(Dense(64, activation='relu'))
-        model.add(Dropout(0.5))
+        model.add(Dense(1024, activation='relu', input_shape=input_layer_shape))
+        #model.add(Dropout(0.5))
+        model.add(Dense(1024, activation='relu'))
+        #model.add(Dropout(0.5))
+        model.add(Dense(1024, activation='relu'))
+        model.add(Dense(1024, activation='relu'))
         model.add(Dense(class_count, activation='softmax'))
         return model
 
-    @staticmethod
-    def train(train_data, classes=[1, 2, 3, 4, 5]):
-        outfitModel = OutfitterModel()
+    def createModelInputVector(self, train_input):
+        input_vector = np.empty((0, 200711), float)
+        for (outfit_features, environment) in train_input:
+            feature_vector = self.process_outfit_features(outfit_features)
+            input_vector = np.append(input_vector, [np.concatenate((feature_vector, [np.asarray(environment)]), axis=None)], axis=0)
+        return input_vector
 
+    def train(self, train_data, classes=[1, 2, 3, 4, 5]):
         (train_input, train_output) = train_data
 
         tbcallback = TensorBoard(log_dir='src/', histogram_freq=0, write_graph=True, write_images=True)
 
-        input_vector = np.empty((0, 200708), float)
-        for (outfit_features, environment) in train_input:
-            feature_vector = outfitModel.process_outfit_features(outfit_features)
-            #feature_vector = outfitModel.process_outfit(outfit_features)
-            input_vector = np.append(input_vector, [np.concatenate((feature_vector, [np.asarray(environment)]), axis=None)], axis=0)
+        input_vector = self.createModelInputVector(train_input) # To be train_input after proper post processing
 
-        model = outfitModel.create_multilayer_perceptron(input_vector[0].shape, len(classes))
+        model = self.create_multilayer_perceptron(input_vector[0].shape, len(classes))
         sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
         model.compile(loss='categorical_crossentropy',
                     optimizer=sgd,
                     metrics=['accuracy'])
-        model.fit(input_vector, np.asarray(train_output),  
+        history = model.fit(input_vector, np.asarray(train_output),  
                 epochs=20, 
-                batch_size=1,
+                batch_size=4,
                 callbacks=[tbcallback])
 
-        return model
+        self.model = model
+        self.history = history.history
     
-    @staticmethod
-    def test(model, test_data):
+    def test(self, model, test_data):
         (test_input, test_output) = test_data
-        return
 
+        input_vectory = self.createModelInputVector(test_input) # To be test_input after proper post processing
+        test_acc, test_loss = self.model.evaluate(test_input, test_output)
+        
+        self.test_acc = test_acc
+        self.test_loss = test_loss
+        print('Test Accuracy: ', test_acc, 'Test Loss: ', test_loss);
+    
+    def run(self, train_data, test_data):
+        self.train(train_data)
+        self.test(test_data)
