@@ -7,6 +7,7 @@
 '''
 from learn.outfitter_model import OutfitterModel
 from keras.preprocessing import image
+from sklearn.model_selection import train_test_split
 import numpy as np
 import os
 import re
@@ -64,8 +65,47 @@ def get_features(surveyDataItem):
 
     return retVal
 
+def construct_dataset(surveys, feature_path):
+    dataset_input = []
+    dataset_output = []
+
+    for survey in surveys:
+        rating = survey['createRating']
+        context_vector = [ 
+            survey['state'],
+            survey['temperature'],
+            survey['sex'],
+            survey['factors']['weather'],
+            survey['factors']['temperature'],
+            survey['factors']['formality'],
+            survey['factors']['season']
+        ]
+
+        for outfit_type in ['createdOutfit', 'randOutfit']:
+            # Ensure the outfit type key exists; randOutfit may not
+            if not outfit_type:
+                continue
+            
+            outfit_json = survey[outfit_type]
+
+            try:
+                clothing_vectors = [
+                    np.fromfile(json.load(open('output/' + filename + '.json')))
+                    for filename in [outfit_json['Tops'], 
+                                     outfit_json['Bottoms']]
+                ]
+            except IOError as e:
+                print('Failure. Skipping survey...', outfit_json)
+                continue
+
+            dataset_input.append((clothing_vectors, context_vector))
+            dataset_output.append(rating)
+
+    return (dataset_input, dataset_output)
 
 clothing_items = get_images('data/')
 extract_all_features(clothing_items)
+surveys = json.load(open('data/surveys.json'))
+dataset = construct_dataset(surveys, 'data/')
+training, testing = train_test_split(dataset, test_size=0.5, shuffle=True)
 
-# data = json.load(open("data/data.json"))
