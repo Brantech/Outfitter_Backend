@@ -97,7 +97,6 @@ def construct_dataset(surveys, feature_path):
                 dataset_output.append(rating)
             except IOError as e:
                 print('Failure. Skipping survey...', outfit_json)
-                continue
 
     return (dataset_input, dataset_output)
 
