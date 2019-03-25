@@ -87,19 +87,17 @@ def construct_dataset(surveys, feature_path):
                 continue
             
             outfit_json = survey[outfit_type]
-
             try:
                 clothing_vectors = [
                     np.fromfile(json.load(open('output/' + filename + '.json')))
                     for filename in [outfit_json['Tops'], 
                                      outfit_json['Bottoms']]
                 ]
+                dataset_input.append((clothing_vectors, context_vector))
+                dataset_output.append(rating)
             except IOError as e:
                 print('Failure. Skipping survey...', outfit_json)
                 continue
-
-            dataset_input.append((clothing_vectors, context_vector))
-            dataset_output.append(rating)
 
     return (dataset_input, dataset_output)
 
