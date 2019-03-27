@@ -53,20 +53,40 @@ class OutfitterModel:
         model = Sequential()
 
         model.add(Dense(1024, activation='relu', input_shape=input_layer_shape))
-        #model.add(Dropout(0.5))
+
         model.add(Dense(1024, activation='relu'))
-        #model.add(Dropout(0.5))
+        model.add(Dropout(0.5))
         model.add(Dense(1024, activation='relu'))
+        model.add(Dropout(0.5))
         model.add(Dense(1024, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(1024, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(1024, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(1024, activation='relu'))
+        model.add(Dropout(0.5))
+
+        model.add(Dense(1024, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(1024, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(1024, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(1024, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(1024, activation='relu'))
+        model.add(Dropout(0.5))
         model.add(Dense(class_count, activation='softmax'))
         return model
 
     def createModelInputVector(self, train_input):
-        input_vector = np.empty((0, 200711), float)
+        dataset_vector = []
         for (outfit_features, environment) in train_input:
             feature_vector = self.process_outfit_features(outfit_features)
-            input_vector = np.append(input_vector, [np.concatenate((feature_vector, [np.asarray(environment)]), axis=None)], axis=0)
-        return input_vector
+            input_vector = np.concatenate((feature_vector, [np.asarray(environment)]), axis=None)
+            dataset_vector.append(input_vector)
+        return np.asarray(dataset_vector)
 
     def train(self, train_data, classes=[1, 2, 3, 4, 5]):
         (train_input, train_output) = train_data
@@ -75,28 +95,29 @@ class OutfitterModel:
 
         input_vector = self.createModelInputVector(train_input) # To be train_input after proper post processing
 
-        model = self.create_multilayer_perceptron(input_vector[0].shape, len(classes))
-        sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-        model.compile(loss='categorical_crossentropy',
-                    optimizer=sgd,
-                    metrics=['accuracy'])
-        history = model.fit(input_vector, np.asarray(train_output),  
-                epochs=20, 
-                batch_size=4,
-                callbacks=[tbcallback])
+        with tf.device('/device:GPU:0'):
+            model = self.create_multilayer_perceptron(input_vector[0].shape, len(classes))
+            sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+            model.compile(loss='categorical_crossentropy',
+                        optimizer=sgd,
+                        metrics=['accuracy'])
+            history = model.fit(input_vector, np.asarray(train_output),  
+                    epochs=20, 
+                    batch_size=input_vector.size,
+                    callbacks=[tbcallback])
 
-        self.model = model
-        self.history = history.history
+            self.model = model
+            self.history = history.history
     
     def test(self, model, test_data):
         (test_input, test_output) = test_data
 
-        input_vectory = self.createModelInputVector(test_input) # To be test_input after proper post processing
-        test_acc, test_loss = self.model.evaluate(test_input, test_output)
+        input_vector = self.createModelInputVector(test_input) # To be test_input after proper post processing
+        test_acc, test_loss = self.model.evaluate(input_vector, test_output)
         
         self.test_acc = test_acc
         self.test_loss = test_loss
-        print('Test Accuracy: ', test_acc, 'Test Loss: ', test_loss);
+        print('Test Accuracy: ', test_acc, 'Test Loss: ', test_loss)
     
     def run(self, train_data, test_data):
         self.train(train_data)

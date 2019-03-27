@@ -70,11 +70,12 @@ def construct_dataset(surveys, feature_path):
     dataset_output = []
 
     for survey in surveys:
-        rating = survey['createRating']
+        rating = np.zeros(5)
+        rating[int(survey['createRating']) - 1] = 1
         context_vector = [ 
             survey['state'],
-            survey['temperature'],
             survey['sex'],
+            survey['factors']['temperature'],
             survey['factors']['weather'],
             survey['factors']['temperature'],
             survey['factors']['formality'],
@@ -83,16 +84,19 @@ def construct_dataset(surveys, feature_path):
 
         for outfit_type in ['createdOutfit', 'randOutfit']:
             # Ensure the outfit type key exists; randOutfit may not
-            if not outfit_type:
+            if not outfit_type in survey:
                 continue
             
             outfit_json = survey[outfit_type]
+
+            if not outfit_json:
+                continue
+
             try:
-                clothing_vectors = [
-                    np.fromfile(json.load(open('output/' + filename + '.json')))
-                    for filename in [outfit_json['Tops'], 
-                                     outfit_json['Bottoms']]
-                ]
+                clothing_vectors = []
+                clothing_vectors.append(json.load(open('output/tops/' + outfit_json['Tops'] + '.json')))
+                clothing_vectors.append(json.load(open('output/bottoms/' + outfit_json['Bottoms'] + '.json')))
+
                 dataset_input.append((clothing_vectors, context_vector))
                 dataset_output.append(rating)
             except IOError as e:
@@ -101,8 +105,13 @@ def construct_dataset(surveys, feature_path):
     return (dataset_input, dataset_output)
 
 clothing_items = get_images('data/')
-extract_all_features(clothing_items)
+#extract_all_features(clothing_items)
 surveys = json.load(open('data/surveys.json'))
 dataset = construct_dataset(surveys, 'data/')
-training, testing = train_test_split(dataset, test_size=0.5, shuffle=True)
+#training, testing = train_test_split(dataset, test_size=0.5, shuffle=True)
+train_in, test_in, train_out, test_out = train_test_split(dataset[0], dataset[1], test_size=0, shuffle=True)
 
+model = OutfitterModel()
+
+model.train((train_in, train_out))
+#model.test((test_in, test_out))
