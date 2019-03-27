@@ -17,6 +17,7 @@ router.get('/', (req, res) =>
 var garmentController = require('./controllers/garmentController');
 var userController = require('./controllers/userController');
 var wardrobeController = require('./controllers/wardrobeController');
+var surveyController = require('./controllers/surveyController');
 
 
 
@@ -62,6 +63,13 @@ router.route('/wardrobe/:user_id/update/:garment_id')
 
 router.route('/wardrobe/wardrobecombos/:user_id')
     .get(wardrobeController.combine);
+
+
+
+// Survey routes
+router.route('/survey')
+    //.get(surveyController.receive)
+    .post(surveyController.out);
 
 
 

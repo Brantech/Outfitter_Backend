@@ -63,6 +63,7 @@ exports.new = (req, res) => {
     var garment = new Garment();
     garment.type = req.body.type;
     garment.imageLink = req.body.imageLink;
+    garment.src = req.body.src;
     // Save the garment and check for errors
     Garment.find({
         imageLink : req.body.imageLink
@@ -126,12 +127,9 @@ exports.update = (req, res) => {
             });
         }
         else {
-            if(req.body.type) {
-                garment.type = req.body.type;
-            }
-            if(req.body.imageLink) {
-                garment.imageLink = req.body.imageLink;
-            }
+            garment.type = req.body.type;
+            garment.imageLink = req.body.imageLink;
+            garment.src = req.body.src;
             // save the garment and check for errors
             garment.save((err) => {
                 if (err) {

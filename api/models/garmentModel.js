@@ -6,6 +6,10 @@ var garmentSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    src: {
+        type: String,
+        required: true
+    },
     imageLink: {
         type: String,
         required: true
