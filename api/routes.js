@@ -68,8 +68,9 @@ router.route('/wardrobe/wardrobecombos/:user_id')
 
 // Survey routes
 router.route('/survey')
-    //.get(surveyController.receive)
     .post(surveyController.out);
+router.route('/surveyin')
+    .post(surveyController.receive)
 
 
 

@@ -91,18 +91,33 @@ exports.out = (req, res) => {
 };
 
 // Handle create garment actions
-// exports.receive = (req, res) => {
-//     var surveyObject = new SurveyObject();
-//     surveyObject.sex = req.body.sex;
-//     surveyObject.state = req.body.state;
-//     surveyObject.factors.formality = req.body.factors.formality;
-//     surveyObject.factors.weather = req.body.factors.formality;
-//     surveyObject.factors.temperature = req.body.factors.formality;
-//     surveyObject.factors.season = req.body.factors.formality;
-//     surveyObject.createdOutfit.Tops = req.body.createdOutfit.Tops;    
-//     surveyObject.createdOutfit.Bottoms = req.body.createdOutfit.Bottoms;
-//     surveyObject.createRating = req.body.createRating;
-//     surveyObject.randomOutfit.Tops = req.body.randomOutfit.Tops;
-//     surveyObject.randomOutfit.Bottoms = req.body.randomOutfit.Bottoms;
-//     surveyObject.randRating = req.body.randRating;
-// };
+exports.receive = (req, res) => {
+    var surveyObject = new SurveyObject();
+    surveyObject.sex = req.body.sex;
+    surveyObject.state = req.body.state;
+    surveyObject.factors.formality = req.body.formality;
+    surveyObject.factors.weather = req.body.weather;
+    surveyObject.factors.temperature = req.body.temperature;
+    surveyObject.factors.season = req.body.season;
+    surveyObject.createdOutfit.Tops = req.body.Tops;    
+    surveyObject.createdOutfit.Bottoms = req.body.Bottoms;
+    surveyObject.createRating = req.body.createRating;
+    surveyObject.randomOutfit.Tops = req.body.randTops;
+    surveyObject.randomOutfit.Bottoms = req.body.randBottoms;
+    surveyObject.randRating = req.body.randRating;
+    // Save the garment and check for errors
+    surveyObject.save((err, survey) => {
+        if (err) {
+            res.json({
+                status: "error",
+                message: err,
+            });
+        }
+        else {
+            res.json({
+                message: 'New survey received!',
+                data: surveyObject
+            });
+        }
+    });
+};
