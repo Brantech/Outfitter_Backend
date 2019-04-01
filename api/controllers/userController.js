@@ -28,85 +28,36 @@ exports.index = (req, res) => {
 // Handle create user actions
 exports.new = (req, res) => {
     var newuser = new User();
-    newuser.username = req.body.username;
+    newuser.username = req.body['username'];
+    newuser._id = req.body['uid'];
+
     // Save the user and check for errors
     newuser.save((err) => {
         if (err) {
             res.json({
-                status: "error",
+                success: false,
                 message: err,
             });
         }
         else {
             res.json({
+                success: true,
                 message: 'New user created!',
                 data: newuser
             });
         }
     });
+
 };
 
 // Handle view user info
 exports.view = (req, res) => {
-    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+    jwt.verify(req.params.idToken, jwkToPem(res.locals.jwk.keys[0]), {algorithms: ['RS256']}, (err, decoded) => {
         if(err) {
             console.log(err)
-        }
-        else {
-            console.log(decoded);
-            res.send(decoded)
-        }
-    });
-
-    User.findById(req.params.user_id, (err, user) => {
-        if (err) {
-            res.json({
-                status: "error",
-                message: err,
-            });
-        }
-        else {
-            if(user) {
-                res.json({
-                    status: 'success',
-                    message: 'User details loading...',
-                    data: user
-                });
-            }
-            else {
-                res.json({
-                    status: 'success',
-                    message: 'There is no such user in existence.'
-                });
-            }
-        }
-    });
-};
-
-// Handle update user info
-exports.update = (req, res) => {
-    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
-        if(err) {
-            console.log(err)
-        }
-        else {
-            console.log(decoded);
-            res.send(decoded)
-        }
-    });
-    User.findById(req.params.user_id, (err, user) => {
-        if (err) {
-            res.json({
-                status: "error",
-                message: err,
-            });
-        }
-        else {
-            if(req.body.username) {
-                user.username = req.body.username;
-            }
-            // save the user and check for errors
-            user.save((err) => {
+            res.send({success: false})
+        } else {
+            User.findById(decoded['sub'], (err, user) => {
                 if (err) {
                     res.json({
                         status: "error",
@@ -114,9 +65,58 @@ exports.update = (req, res) => {
                     });
                 }
                 else {
+                    if(user) {
+                        res.json({
+                            success: true,
+                            message: 'User details loading...',
+                            data: user
+                        });
+                    }
+                    else {
+                        res.json({
+                            success: false,
+                            message: 'There is no such user in existence.'
+                        });
+                    }
+                }
+            });
+        }
+    });
+};
+
+// Handle update user info
+exports.update = (req, res) => {
+    jwt.verify(req.params.idToken, jwkToPem(res.locals.jwk.keys[0]), {algorithms: ['RS256']}, (err, decoded) => {
+        if(err) {
+            console.log(err)
+            res.send({success: false})
+        }
+        else {
+            User.findById(decoded['sub'], (err, user) => {
+                if (err) {
                     res.json({
-                        message: 'User Info updated',
-                        data: user
+                        status: "error",
+                        message: err,
+                    });
+                }
+                else {
+                    if(req.body.username) {
+                        user.username = req.body.username;
+                    }
+                    // save the user and check for errors
+                    user.save((err) => {
+                        if (err) {
+                            res.json({
+                                status: "error",
+                                message: err,
+                            });
+                        }
+                        else {
+                            res.json({
+                                message: 'User Info updated',
+                                data: user
+                            });
+                        }
                     });
                 }
             });
@@ -126,37 +126,38 @@ exports.update = (req, res) => {
 
 // Handle delete user
 exports.delete = (req, res) => {
-    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+    jwt.verify(req.params.idToken, jwkToPem(res.locals.jwk.keys[0]), {algorithms: ['RS256']}, (err, decoded) => {
         if(err) {
             console.log(err)
+            res.send({success: false})
         }
         else {
             console.log(decoded);
-            res.send(decoded)
-        }
-    });
-    User.remove({ _id: req.params.user_id }, (err) => {
-        if (err) {
-            res.json({
-                status: "User delete error",
-                message: err,
-            });
-        }
-        else {
-            Wardrobe.deleteMany({
-                owner_id: req.params.user_id
-            })
-            .exec((err) => {
-                if(err) {
+
+            User.remove({ _id: decoded['sub'] }, (err) => {
+                if (err) {
                     res.json({
-                        status: "Wardrobe delete error",
+                        success: false,
                         message: err,
                     });
                 }
                 else {
-                    res.json({
-                        status: "success",
-                        message: 'User and wardrobe deleted'
+                    Wardrobe.deleteMany({
+                        owner_id: decoded['sub']
+                    })
+                    .exec((err) => {
+                        if(err) {
+                            res.json({
+                                success: false,
+                                message: err,
+                            });
+                        }
+                        else {
+                            res.json({
+                                success: true,
+                                message: 'User and wardrobe deleted'
+                            });
+                        }
                     });
                 }
             });

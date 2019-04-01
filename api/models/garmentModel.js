@@ -9,10 +9,6 @@ var garmentSchema = mongoose.Schema({
     src: {
         type: String,
         required: true
-    },
-    imageLink: {
-        type: String,
-        required: true
     }
 });
 
