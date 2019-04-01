@@ -12,11 +12,12 @@ MAKE THIS FASTER!!!!
 # TensorFlow and tf.keras
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import math
 from tensorflow.layers import Flatten
 from keras.callbacks import TensorBoard
 from keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
-from keras.layers import Dense, Dropout, Activation
-from keras.models import Sequential
+from keras.layers import Input, Dense, Dropout, Activation
+from keras.models import Sequential, Model
 from keras.optimizers import SGD
 from keras.preprocessing import image
 import numpy as np
@@ -50,35 +51,19 @@ class OutfitterModel:
         return np.asarray(feature_vector_final)
 
     def create_multilayer_perceptron(self, input_layer_shape, class_count):
-        model = Sequential()
+        inputs = Input(shape=input_layer_shape)
 
-        model.add(Dense(1024, activation='relu', input_shape=input_layer_shape))
+        exp = math.floor(math.log(input_layer_shape[0], 2.0))
+        layer_size = 2 ** exp
 
-        model.add(Dense(1024, activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(1024, activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(1024, activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(1024, activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(1024, activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(1024, activation='relu'))
-        model.add(Dropout(0.5))
+        x = Dense(math.floor(layer_size/512), activation='relu')(inputs)
+        x = Dense(math.floor(layer_size/512), activation='relu')(x)
+        x = Dense(math.floor(layer_size/512), activation='relu')(x)
+        x = Dense(math.floor(layer_size/512), activation='relu')(x)
+        x = Dense(math.floor(layer_size/512), activation='relu')(x)
 
-        model.add(Dense(1024, activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(1024, activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(1024, activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(1024, activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(1024, activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(class_count, activation='softmax'))
-        return model
+        predictions = Dense(class_count, activation='softmax')(x)
+        return Model(inputs=inputs, outputs=predictions)
 
     def createModelInputVector(self, train_input):
         dataset_vector = []
