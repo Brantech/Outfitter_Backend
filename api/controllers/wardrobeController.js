@@ -63,12 +63,11 @@ exports.index = (req, res) => {
     jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
         if(err) {
             console.log(err)
-        }
-        else {
-            console.log(decoded);
-            res.send(decoded)
+            res.send({success: false})
+            return
         }
     });
+
     Wardrobe.get((err, wardrobeItems) => {
         if (err) {
             res.json({
@@ -122,12 +121,11 @@ exports.new = (req, res) => {
     jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
         if(err) {
             console.log(err)
-        }
-        else {
-            console.log(decoded);
-            res.send(decoded)
+            res.send({success: false})
+            return
         }
     });
+
     Garment.find({_id: req.body.garment_id}, (err, garment) => {
         if (garment) {
             Wardrobe.find({garment_id: req.body.garment_id, owner_id: req.params.user_id}, (err, wardrobeitem) => {
@@ -177,12 +175,11 @@ exports.view = (req, res) => {
     jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
         if(err) {
             console.log(err)
-        }
-        else {
-            console.log(decoded);
-            res.send(decoded)
+            res.send({success: false})
+            return
         }
     });
+
     Wardrobe.findById(req.params.wardrobe_id, (err, wardrobeItem) => {
         if (err) {
             res.json({
@@ -204,10 +201,8 @@ exports.update = (req, res) => {
     jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
         if(err) {
             console.log(err)
-        }
-        else {
-            console.log(decoded);
-            res.send(decoded)
+            res.send({success: false})
+            return
         }
     });
     Wardrobe.find({owner_id: req.params.user_id, garment_id: req.params.garment_id}, (err, wardrobeItem) => {
@@ -260,10 +255,8 @@ exports.delete = (req, res) => {
     jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
         if(err) {
             console.log(err)
-        }
-        else {
-            console.log(decoded);
-            res.send(decoded)
+            res.send({success: false})
+            return
         }
     });  
     Wardrobe.find({owner_id: req.params.user_id, garment_id: req.params.garment_id}, (err, wardrobeItem) => {

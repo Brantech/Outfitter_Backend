@@ -60,13 +60,14 @@ exports.combine = (req, res) => {
 
 // Handle create garment actions
 exports.new = (req, res) => {
+
     var garment = new Garment();
     garment.type = req.body.type;
-    garment.imageLink = req.body.imageLink;
     garment.src = req.body.src;
+
     // Save the garment and check for errors
     Garment.find({
-        imageLink : req.body.imageLink
+        src : req.body.src
     }).exec((err, garments) => {
         if(err) {
             res.json({
@@ -95,6 +96,8 @@ exports.new = (req, res) => {
                     });
                 }
             });
+
+            console.log("Created!");
         }
     })
 };
@@ -113,6 +116,7 @@ exports.view = (req, res) => {
                 message: 'Garment details loading...',
                 data: garment
             });
+            res.sendfile(garment.src)
         }
     });
 };
@@ -128,7 +132,6 @@ exports.update = (req, res) => {
         }
         else {
             garment.type = req.body.type;
-            garment.imageLink = req.body.imageLink;
             garment.src = req.body.src;
             // save the garment and check for errors
             garment.save((err) => {

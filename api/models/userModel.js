@@ -2,6 +2,10 @@ var mongoose = require('mongoose');
 
 // Setup schema
 var userSchema = mongoose.Schema({
+    _id: {
+        type: String,
+        required: true,
+    },
     username: {
         type: String,
         required: true
