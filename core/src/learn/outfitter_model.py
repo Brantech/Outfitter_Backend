@@ -1,4 +1,4 @@
-'''
+"""
 
 learn.py
 
@@ -8,22 +8,21 @@ The core learning class.
 
 MAKE THIS FASTER!!!!
 
-'''
+"""
+
 # TensorFlow and tf.keras
-import matplotlib.pyplot as plt
 import tensorflow as tf
 import math
-from tensorflow.layers import Flatten
+import numpy as np
 from keras.callbacks import TensorBoard
 from keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
 from keras.layers import Input, Dense, Dropout, Activation
-from keras.models import Sequential, Model
+from keras.models import Model
 from keras.optimizers import SGD
-from keras.preprocessing import image
-import numpy as np
-import pandas as pd
+
 
 def parse_labels(labels, label_count=10):
+
     ret_array = []
     for label in labels:
         out = np.zeros((label_count,))
@@ -31,10 +30,16 @@ def parse_labels(labels, label_count=10):
         ret_array.append(out)
     return np.array(ret_array)
 
+
 class OutfitterModel:
     def __init__(self):
         # Feature Extractor - Test other feature extractors
         self.base_model = ResNet50(weights='imagenet', include_top=False)
+
+        self.model = None
+        self.history = None
+        self.test_acc = None
+        self.test_loss = None
 
     def get_features(self, x):
         x = np.expand_dims(x, axis=0)
@@ -84,24 +89,29 @@ class OutfitterModel:
             model = self.create_multilayer_perceptron(input_vector[0].shape, len(classes))
             sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
             model.compile(loss='categorical_crossentropy',
-                        optimizer=sgd,
-                        metrics=['accuracy'])
+                          optimizer=sgd,
+                          metrics=['accuracy'])
             history = model.fit(input_vector, np.asarray(train_output),  
-                    epochs=20, 
-                    batch_size=input_vector.size,
-                    callbacks=[tbcallback])
+                                epochs=20,
+                                batch_size=input_vector.size,
+                                callbacks=[tbcallback])
 
             self.model = model
+            self.model.save('my_model.h5')
+
             self.history = history.history
     
-    def test(self, model, test_data):
+    def test(self, test_data):
         (test_input, test_output) = test_data
+
+        # Load model here
 
         input_vector = self.createModelInputVector(test_input) # To be test_input after proper post processing
         test_acc, test_loss = self.model.evaluate(input_vector, test_output)
         
         self.test_acc = test_acc
         self.test_loss = test_loss
+
         print('Test Accuracy: ', test_acc, 'Test Loss: ', test_loss)
     
     def run(self, train_data, test_data):

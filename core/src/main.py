@@ -108,7 +108,6 @@ clothing_items = get_images('data/')
 #extract_all_features(clothing_items)
 surveys = json.load(open('data/surveys.json'))
 dataset = construct_dataset(surveys, 'data/')
-#training, testing = train_test_split(dataset, test_size=0.5, shuffle=True)
 train_in, test_in, train_out, test_out = train_test_split(dataset[0], dataset[1], test_size=0, shuffle=True)
 
 model = OutfitterModel()
