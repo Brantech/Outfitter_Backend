@@ -123,7 +123,3 @@ class OutfitterModel:
             return test_acc, test_loss
         except (ImportError, ValueError):
             return "Error"
-    
-    def run(self, train_data, test_data):
-        self.train(train_data)
-        self.test(test_data)
