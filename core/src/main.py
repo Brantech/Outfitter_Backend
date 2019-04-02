@@ -5,14 +5,14 @@
     
     The main entry point
 '''
-from learn.outfitter_model import OutfitterModel
+from .learn.outfitter_model import OutfitterModel
 from keras.preprocessing import image
 from sklearn.model_selection import train_test_split
 import numpy as np
 import os
 import re
 import json
-import shelve
+
 
 def get_images(root_dir):
     result = {'tops': [], 'bottoms': []}
@@ -28,7 +28,8 @@ def get_images(root_dir):
             result[clothing].append((path, filename))
     return result
 
-def extract_all_features(items):
+
+def extract_all_features(clothing_items):
     model = OutfitterModel()
     output = {'data': {}}
 
@@ -55,15 +56,17 @@ def extract_all_features(items):
             curr += 1
             print("Progress: " + str(curr) + "/" + str(length))
 
-def get_features(surveyDataItem):
-    retVal = []
 
-    for i in surveyDataItem["createdOutfit"]:
+def get_features(survey_data_item):
+    ret_val = []
+
+    for i in survey_data_item["createdOutfit"]:
         mapping = json.load(open("output/" + i.lower() + "/mappings.json"))
 
-        retVal.append(json.load(open("output/" + i.lower() + "/" + mapping[surveyDataItem["createdOutfit"][i]])))
+        ret_val.append(json.load(open("output/" + i.lower() + "/" + mapping[survey_data_item["createdOutfit"][i]])))
 
-    return retVal
+    return ret_val
+
 
 def construct_dataset(surveys, feature_path):
     dataset_input = []
@@ -84,7 +87,7 @@ def construct_dataset(surveys, feature_path):
 
         for outfit_type in ['createdOutfit', 'randOutfit']:
             # Ensure the outfit type key exists; randOutfit may not
-            if not outfit_type in survey:
+            if outfit_type not in survey:
                 continue
             
             outfit_json = survey[outfit_type]
@@ -102,15 +105,15 @@ def construct_dataset(surveys, feature_path):
             except IOError as e:
                 print('Failure. Skipping survey...', outfit_json)
 
-    return (dataset_input, dataset_output)
+    return dataset_input, dataset_output
 
-clothing_items = get_images('data/')
-#extract_all_features(clothing_items)
-surveys = json.load(open('data/surveys.json'))
-dataset = construct_dataset(surveys, 'data/')
+
+items = get_images('data/')
+# extract_all_features(items)
+_surveys = json.load(open('data/surveys.json'))
+dataset = construct_dataset(_surveys, 'data/')
+# Construct dataset using OutfitterModel.create_model_input_vector()
 train_in, test_in, train_out, test_out = train_test_split(dataset[0], dataset[1], test_size=0, shuffle=True)
 
-model = OutfitterModel()
-
-model.train((train_in, train_out))
-#model.test((test_in, test_out))
+OutfitterModel.train((train_in, train_out))
+# model.test((test_in, test_out))
