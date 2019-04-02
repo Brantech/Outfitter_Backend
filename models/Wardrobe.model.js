@@ -1,7 +1,6 @@
 var mongoose = require('mongoose');
 
-// Setup schema
-var wardrobeSchema = mongoose.Schema({
+var WardrobeSchema = new mongoose.Schema({
     tags: {
         type: [String]
     },
@@ -13,7 +12,7 @@ var wardrobeSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    dateAdded: {
+    date_added: {
         type: Date,
         default: Date.now
     },
@@ -23,8 +22,6 @@ var wardrobeSchema = mongoose.Schema({
     }
 });
 
-// Export Wardrobe model
-var Wardrobe = module.exports = mongoose.model('wardrobe', wardrobeSchema);
-module.exports.get = (callback, limit) => {
-    Wardrobe.find(callback).limit(limit);
-}
+var Wardrobe = mongoose.model('Wardrobe', WardrobeSchema);
+
+module.exports = Wardrobe;
