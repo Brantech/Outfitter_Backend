@@ -9,7 +9,7 @@ exports.getRecommendations = async function (req, res, next) {
         // var recommendations = await OutfitService.getRecommendations(id, factors);
         return res.status(200)
                   .json({
-                      data: '', 
+                      data: '',
                       message: 'Successfully obtained recommendations'
                   });
     } catch (e) {
