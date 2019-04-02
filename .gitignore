@@ -85,3 +85,6 @@ typings/
 
 # MacOS Files
 .DS_Store
+
+# VS Code
+.vscode
