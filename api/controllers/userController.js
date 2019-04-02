@@ -5,6 +5,15 @@ Wardrobe = require('./../models/wardrobeModel');
 // Authentication
 let jwt = require('jsonwebtoken');
 let jwkToPem = require('jwk-to-pem');
+const {Auth} = require('aws-amplify');
+
+Auth.configure({
+    identityPoolId: 'us-east-1:609b02fe-1656-4f3c-a709-f0314352727a',
+    region: 'us-east-1',
+    userPoolId: 'us-east-1_bBfUzR7Vr',
+    userPoolWebClientId: '2qlg1os2kkpdbulfhlt48cptq4',
+});
+
 
 // Handle index actions
 exports.index = (req, res) => {
@@ -28,26 +37,44 @@ exports.index = (req, res) => {
 // Handle create user actions
 exports.new = (req, res) => {
     var newuser = new User();
-    newuser.username = req.body['username'];
-    newuser._id = req.body['uid'];
-
-    // Save the user and check for errors
-    newuser.save((err) => {
-        if (err) {
-            res.json({
-                success: false,
-                message: err,
-            });
+    // Registration validation
+    const payload = {
+        username: req.body.username,
+        password: req.body.password,
+        attributes: {
+            email: req.body.email,
+            family_name: req.body.lname,
+            name: req.body.fname
         }
-        else {
-            res.json({
-                success: true,
-                message: 'New user created!',
-                data: newuser
-            });
-        }
+    }
+    Auth.signUp(payload).then((data) => {
+        console.log("hey1");
+        newuser.username = data['user']['username']
+        newuser._id = data['userSub']
+        console.log("hey2");
+        // Save the user and check for errors
+        newuser.save((err, newuser) => {
+            console.log("Yup");
+            if (err) {
+                console.log("fail");
+                res.send({
+                    status: "error",
+                    message: err,
+                });
+            }
+            else {
+                console.log("success");
+                res.send({
+                    message: 'New user created!',
+                    data: newuser
+                });
+            }
+        });
+    }).catch(err => {
+        console.log(err)
+        console.log("I mean we got somewhere.");
+        res.send({message: err})
     });
-
 };
 
 // Handle view user info
