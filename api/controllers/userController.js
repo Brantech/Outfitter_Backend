@@ -26,7 +26,7 @@ exports.index = (req, res) => {
 };
 
 // Handle create user actions
-exports.new = (req, res) => {
+exports.new = (req, res) => {    
     var newuser = new User();
     newuser.username = req.body['username'];
     newuser._id = req.body['uid'];

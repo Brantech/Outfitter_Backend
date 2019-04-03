@@ -36,10 +36,10 @@ exports.combine = (req, res) => {
             var combos = new Array();
 
             for(var i = 0; i < garments.length; i++) {
-                if(garments[i].type == 'shirt') {
+                if(garments[i].type == 'top') {
                     shirts.push(garments[i]);
                 }
-                if(garments[i].type == 'pants') {
+                if(garments[i].type == 'bottom') {
                     pants.push(garments[i]);
                 }
             }
@@ -116,7 +116,6 @@ exports.view = (req, res) => {
                 message: 'Garment details loading...',
                 data: garment
             });
-            res.sendfile(garment.src)
         }
     });
 };
