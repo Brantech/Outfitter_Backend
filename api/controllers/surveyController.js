@@ -55,7 +55,7 @@ exports.out = (req, res) => {
             }
             for(var i = 0; i < numberTops; i++) {
                 index = Math.floor(Math.random()*indecies.length);
-                randTops.push(shirts[indecies[index]]);
+                randTops.push(shirts[indecies[index]]['src']);
                 indecies.splice(index, 1)
             }
 
@@ -65,12 +65,12 @@ exports.out = (req, res) => {
             }
             for(var i = 0; i < numberBottoms; i++) {
                 index = Math.floor(Math.random()*moreIndecies.length);
-                randBottoms.push(pants[moreIndecies[index]]);
+                randBottoms.push(pants[moreIndecies[index]]['src']);
                 moreIndecies.splice(index, 1);
             }
 
-            var oneshirt = [randTops[Math.floor(Math.random()*randTops.length)]]
-            var onebottom = [randBottoms[Math.floor(Math.random()*randBottoms.length)]]
+            var oneshirt = [randTops[Math.floor(Math.random()*randTops.length)]['src']];
+            var onebottom = [randBottoms[Math.floor(Math.random()*randBottoms.length)]['src']]
 
             // randTops has random number of shirts
             // randBottoms has random number of bottoms
@@ -83,9 +83,7 @@ exports.out = (req, res) => {
             surveyOutput.randomWardrobe.Tops = randTops;
             surveyOutput.randomWardrobe.Bottoms = randBottoms;
             
-            res.json({
-                surveyOutput
-            });
+            res.json(surveyOutput);
         }
     });
 };
@@ -114,10 +112,7 @@ exports.receive = (req, res) => {
             });
         }
         else {
-            res.json({
-                message: 'New survey received!',
-                data: surveyObject
-            });
+            res.send('New survey received!');
         }
     });
 };
