@@ -16,7 +16,7 @@ var authorization = function (req, res, next) {
             var message = {auth: false, message: 'Failed to authenticate token.'};
             return res.status(401).send(message);
         }
-        req.app.locals.user = response;
+        req.app.locals.auth = response;
         next();
     });
 }
