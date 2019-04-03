@@ -5,7 +5,7 @@
     
     The main entry point
 '''
-from .learn.outfitter_model import OutfitterModel
+from learn.outfitter_model import OutfitterModel
 from keras.preprocessing import image
 from sklearn.model_selection import train_test_split
 import numpy as np
@@ -113,7 +113,9 @@ items = get_images('data/')
 _surveys = json.load(open('data/surveys.json'))
 dataset = construct_dataset(_surveys, 'data/')
 # Construct dataset using OutfitterModel.create_model_input_vector()
-train_in, test_in, train_out, test_out = train_test_split(dataset[0], dataset[1], test_size=0, shuffle=True)
+train_in, test_in, train_out, test_out = train_test_split(dataset[0], dataset[1], test_size=0.2, shuffle=True)
 
-OutfitterModel.train((train_in, train_out))
-# model.test((test_in, test_out))
+# history = OutfitterModel.train((train_in, train_out))
+# print(history)
+test_info = OutfitterModel.test((test_in, test_out), 'my_model.h5')
+print(test_info)

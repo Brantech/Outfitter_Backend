@@ -11,6 +11,7 @@ MAKE THIS FASTER!!!!
 """
 
 # TensorFlow and tf.keras
+import h5py
 import tensorflow as tf
 import math
 import numpy as np
@@ -35,10 +36,6 @@ class OutfitterModel:
     def __init__(self):
         # Feature Extractor - Test other feature extractors
         self.base_model = ResNet50(weights='imagenet', include_top=False)
-
-        self.history = None
-        self.test_acc = None
-        self.test_loss = None
 
     def get_features(self, x):
         x = np.expand_dims(x, axis=0)
@@ -94,7 +91,7 @@ class OutfitterModel:
         with tf.device(device):
             try:
                 model = load_model(load_path)
-            except (ImportError, ValueError) as e:
+            except (ImportError, ValueError, TypeError) as e:
                 model = OutfitterModel.create_multilayer_perceptron(input_vector[0].shape, len(classes))
                 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
                 model.compile(loss='categorical_crossentropy',
@@ -118,8 +115,9 @@ class OutfitterModel:
             input_vector = OutfitterModel.create_model_input_vector(test_input)  # test_input after proper post processing
 
             model = load_model(load_path)
-            test_acc, test_loss = model.evaluate(input_vector, test_output)
+            test_acc, test_loss = model.evaluate(input_vector, np.asarray(test_output))
 
             return test_acc, test_loss
-        except (ImportError, ValueError):
+        except (ImportError, ValueError, TypeError) as e:
+            print(e)
             return "Error"
