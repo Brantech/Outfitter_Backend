@@ -12,7 +12,7 @@ import numpy as np
 import os
 import re
 import json
-import shelve
+
 
 def get_images(root_dir):
     result = {'tops': [], 'bottoms': []}
@@ -28,7 +28,8 @@ def get_images(root_dir):
             result[clothing].append((path, filename))
     return result
 
-def extract_all_features(items):
+
+def extract_all_features(clothing_items):
     model = OutfitterModel()
     output = {'data': {}}
 
@@ -55,26 +56,29 @@ def extract_all_features(items):
             curr += 1
             print("Progress: " + str(curr) + "/" + str(length))
 
-def get_features(surveyDataItem):
-    retVal = []
 
-    for i in surveyDataItem["createdOutfit"]:
+def get_features(survey_data_item):
+    ret_val = []
+
+    for i in survey_data_item["createdOutfit"]:
         mapping = json.load(open("output/" + i.lower() + "/mappings.json"))
 
-        retVal.append(json.load(open("output/" + i.lower() + "/" + mapping[surveyDataItem["createdOutfit"][i]])))
+        ret_val.append(json.load(open("output/" + i.lower() + "/" + mapping[survey_data_item["createdOutfit"][i]])))
 
-    return retVal
+    return ret_val
+
 
 def construct_dataset(surveys, feature_path):
     dataset_input = []
     dataset_output = []
 
     for survey in surveys:
-        rating = survey['createRating']
+        rating = np.zeros(5)
+        rating[int(survey['createRating']) - 1] = 1
         context_vector = [ 
             survey['state'],
-            survey['temperature'],
             survey['sex'],
+            survey['factors']['temperature'],
             survey['factors']['weather'],
             survey['factors']['temperature'],
             survey['factors']['formality'],
@@ -83,26 +87,35 @@ def construct_dataset(surveys, feature_path):
 
         for outfit_type in ['createdOutfit', 'randOutfit']:
             # Ensure the outfit type key exists; randOutfit may not
-            if not outfit_type:
+            if outfit_type not in survey:
                 continue
             
             outfit_json = survey[outfit_type]
+
+            if not outfit_json:
+                continue
+
             try:
-                clothing_vectors = [
-                    np.fromfile(json.load(open('output/' + filename + '.json')))
-                    for filename in [outfit_json['Tops'], 
-                                     outfit_json['Bottoms']]
-                ]
+                clothing_vectors = []
+                clothing_vectors.append(json.load(open('output/tops/' + outfit_json['Tops'] + '.json')))
+                clothing_vectors.append(json.load(open('output/bottoms/' + outfit_json['Bottoms'] + '.json')))
+
                 dataset_input.append((clothing_vectors, context_vector))
                 dataset_output.append(rating)
             except IOError as e:
                 print('Failure. Skipping survey...', outfit_json)
 
-    return (dataset_input, dataset_output)
+    return dataset_input, dataset_output
 
-clothing_items = get_images('data/')
-extract_all_features(clothing_items)
-surveys = json.load(open('data/surveys.json'))
-dataset = construct_dataset(surveys, 'data/')
-training, testing = train_test_split(dataset, test_size=0.5, shuffle=True)
 
+items = get_images('data/')
+# extract_all_features(items)
+_surveys = json.load(open('data/surveys.json'))
+dataset = construct_dataset(_surveys, 'data/')
+# Construct dataset using OutfitterModel.create_model_input_vector()
+train_in, test_in, train_out, test_out = train_test_split(dataset[0], dataset[1], test_size=0.2, shuffle=True)
+
+# history = OutfitterModel.train((train_in, train_out))
+# print(history)
+test_info = OutfitterModel.test((test_in, test_out), 'my_model.h5')
+print(test_info)
