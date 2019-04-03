@@ -5,6 +5,10 @@ services:
   app:
     container_name: outfittr-api
     build: .
+    environment:
+      - USER_POOL=${USER_POOL}
+      - NODE_ENV=${NODE_ENV:-development}
+      - DEBUG=outfittr-api
     ports:
       - '3000:3000'
     links:

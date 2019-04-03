@@ -1,13 +1,12 @@
 module.exports = {
     'ENV': process.env.NODE_ENV,
-    'PORT': process.env.PORT || '3000',
-    'SECRET': process.env.SECRET,
+    'PORT': '3000',
     'COGNITO_CONFIG': {
         region: "us-east-1",
-        cognitoUserPoolId: "us-east-1_bBfUzR7Vr",
+        cognitoUserPoolId: process.env.USER_POOL,
         tokenUse: "access"
     },
-    'DATABASE': '',
-    'API_DEBUG': 'outfittr-api:server',
+    'DATABASE': 'mongodb://mongo:27017/outfittr',
+    'API_DEBUG': 'outfittr-api',
     'ORIGINS': [/\.outfittr\.net$/]
 };
