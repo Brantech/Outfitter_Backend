@@ -20,7 +20,7 @@ exports.getUsers = async function (req, res, next) {
 
 exports.createUser = async function (req, res, next) {
     var user = {
-        username: req.body.username
+        _id: req.body.
     };
     try {
         var createdUser = await UserService.createUser(user);
