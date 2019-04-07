@@ -167,53 +167,49 @@ exports.view = (req, res) => {
 
 // Handle update garment info
 exports.update = (req, res) => {
-    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+    jwt.verify(req.params.idToken, jwkToPem(res.locals.jwk.keys[0]), {algorithms: ['RS256']}, (err, decoded) => {
         if(err) {
             console.log(err)
             res.send({success: false})
             return
-        }
-    });
-    Wardrobe.find({owner_id: req.params.user_id, garment_id: req.params.garment_id}, (err, wardrobeItem) => {
-        if(wardrobeItem.length) {
-            if(req.body.tags) {
-                wardrobeItem[0].tags = req.body.tags;
-            }
-            if(req.body.type) {
-                wardrobeItem[0].type = req.body.type;
-            }
-            // save the garment and check for errors
-            wardrobeItem[0].save((err) => {
-                if (err) {
+        } else {
+            Wardrobe.find({owner_id: decoded.sub, garment_id: req.params.garment_id}, (err, wardrobeItem) => {
+                if(wardrobeItem.length) {
+                    if(req.body.tags) {
+                        wardrobeItem[0].tags = req.body.tags;
+                    }
+                    if(req.body.type) {
+                        wardrobeItem[0].type = req.body.type;
+                    }
+                    // save the garment and check for errors
+                    wardrobeItem[0].save((err) => {
+                        if (err) {
+                            res.json({
+                                success: false,
+                                message: err,
+                            });
+                        }
+                        else {
+                            res.json({
+                                success: true,
+                                data: wardrobeItem
+                            });
+                        }
+                    });
+                }
+                else if (err) {
                     res.json({
-                        status: "error",
-                        message: err,
+                        success: false,
+                        err: err,
                     });
                 }
                 else {
                     res.json({
-                        message: 'Wardrobe garment Info updated',
-                        data: wardrobeItem
+                        success: false,
+                        err: "No such item in wardrobe",
                     });
                 }
-            });
-        }
-        else if(!wardrobeItem.length) {
-            res.json({
-                status: "failed",
-                message: "No such item in wardrobe",
-            });
-        }
-        else if (err) {
-            res.json({
-                status: "error",
-                message: err,
-            });
-        }
-        else {
-            res.json({
-                status: "unknown",
-                message: "An unknown issue occurred.",
+                
             });
         }
     });
@@ -221,47 +217,25 @@ exports.update = (req, res) => {
 
 // Handle delete garment
 exports.delete = (req, res) => {
-    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+    jwt.verify(req.params.idToken, jwkToPem(res.locals.jwk.keys[0]), {algorithms: ['RS256']}, (err, decoded) => {
         if(err) {
             console.log(err)
             res.send({success: false})
             return
-        }
-    });  
-    Wardrobe.find({owner_id: req.params.user_id, garment_id: req.params.garment_id}, (err, wardrobeItem) => {
-        if(wardrobeItem.length) {
-            Wardrobe.remove({ owner_id: req.params.user_id, garment_id: req.params.garment_id }, (err) => {
+        } else {
+            Wardrobe.remove({ owner_id: decoded.sub, garment_id: req.params.garment_id }, (err) => {
                 if (err) {
                     res.json({
-                        status: "error",
+                        success: false,
                         message: err,
                     });
                 }
                 else {
                     res.json({
-                        status: "success",
-                        message: 'Garment deleted from wardrobe'
+                        success: true,
                     });
                 }
             });
         }
-        else if(!wardrobeItem.length) {
-            res.json({
-                status: "failed",
-                message: "No such item in wardrobe",
-            });
-        }
-        else if (err) {
-            res.json({
-                status: "error",
-                message: err,
-            });
-        }
-        else {
-            res.json({
-                status: "unknown",
-                message: "An unknown issue occurred.",
-            });
-        }
-    });   
+    });
 };
