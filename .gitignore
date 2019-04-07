@@ -32,3 +32,9 @@ node_modules
 
 # Runtime configuration for swagger app
 config/runtime.yaml
+core/src/data/bottoms/
+core/src/data/tops/
+core/src/output/bottoms/018569b69231bc62601a9874fdfb597a223f2a7b.jpg.json
+core/src/output/
+deployable/
+core/src/learn/__pycache__/

@@ -21,7 +21,7 @@
     "express": "^4.16.4",
     "jsonwebtoken": "^8.4.0",
     "mongoose": "5.2.7",
-    "jwk-to-pem": "^2.0.1"
+    "jwk-to-pem": "^2.0.1",
   },
   "devDependencies": {
     "should": "^7.1.0",

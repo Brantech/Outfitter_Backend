@@ -14,7 +14,7 @@ var surveySchema = mongoose.Schema({
         Tops: String,
         Bottoms: String
     },
-    createRating: Number,
+    createdRating: Number,
     randomOutfit: {
         Tops: String,
         Bottoms: String

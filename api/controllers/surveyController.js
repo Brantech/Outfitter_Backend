@@ -3,6 +3,25 @@ Garment = require('./../models/garmentModel');
 SurveyObject = require('./../models/surveyModel');
 SurveyOutputObject = require('./../models/surveyOutputModel');
 
+// Handle index actions
+exports.index = (req, res) => {
+    SurveyObject.get((err, surveys) => {
+        if (err) {
+            res.json({
+                status: "error",
+                message: err,
+            });
+        }
+        else {
+            res.json({
+                status: "success",
+                message: "Surveys retrieved successfully",
+                data: surveys
+            });
+        }
+    });
+};
+
 // Combine garments
 exports.out = (req, res) => {
     numberTops = req.body.numberTops;
@@ -19,10 +38,10 @@ exports.out = (req, res) => {
             var shirts = new Array();
             var pants = new Array();
             for(var i = 0; i < garments.length; i++) {
-                if(garments[i].type == 'shirt') {
+                if(garments[i].type == 'top') {
                     shirts.push(garments[i]);
                 }
-                if(garments[i].type == 'pants') {
+                if(garments[i].type == 'bottom') {
                     pants.push(garments[i]);
                 }
             }
@@ -68,9 +87,9 @@ exports.out = (req, res) => {
                 randBottoms.push(pants[moreIndecies[index]]['src']);
                 moreIndecies.splice(index, 1);
             }
-
-            var oneshirt = [randTops[Math.floor(Math.random()*randTops.length)]['src']];
-            var onebottom = [randBottoms[Math.floor(Math.random()*randBottoms.length)]['src']]
+            
+            var oneshirt = [randTops[Math.floor(Math.random()*randTops.length)]];
+            var onebottom = [randBottoms[Math.floor(Math.random()*randBottoms.length)]]
 
             // randTops has random number of shirts
             // randBottoms has random number of bottoms
@@ -90,18 +109,19 @@ exports.out = (req, res) => {
 
 // Handle create garment actions
 exports.receive = (req, res) => {
+    console.log(req.body)
     var surveyObject = new SurveyObject();
     surveyObject.sex = req.body.sex;
     surveyObject.state = req.body.state;
-    surveyObject.factors.formality = req.body.formality;
-    surveyObject.factors.weather = req.body.weather;
-    surveyObject.factors.temperature = req.body.temperature;
-    surveyObject.factors.season = req.body.season;
-    surveyObject.createdOutfit.Tops = req.body.Tops;    
-    surveyObject.createdOutfit.Bottoms = req.body.Bottoms;
-    surveyObject.createRating = req.body.createRating;
-    surveyObject.randomOutfit.Tops = req.body.randTops;
-    surveyObject.randomOutfit.Bottoms = req.body.randBottoms;
+    surveyObject.factors.formality = req.body.factors.formality;
+    surveyObject.factors.weather = req.body.factors.weather;
+    surveyObject.factors.temperature = req.body.factors.temperature;
+    surveyObject.factors.season = req.body.factors.season;
+    surveyObject.createdOutfit.Tops = req.body.createdOutfit.Tops;    
+    surveyObject.createdOutfit.Bottoms = req.body.createdOutfit.Bottoms;
+    surveyObject.createdRating = req.body.createdRating;
+    surveyObject.randomOutfit.Tops = req.body.randomOutfit.Tops;
+    surveyObject.randomOutfit.Bottoms = req.body.randomOutfit.Bottoms;
     surveyObject.randRating = req.body.randRating;
     // Save the garment and check for errors
     surveyObject.save((err, survey) => {
@@ -112,7 +132,7 @@ exports.receive = (req, res) => {
             });
         }
         else {
-            res.send('New survey received!');
+            res.send({success: true, message: 'New survey received!'});
         }
     });
 };

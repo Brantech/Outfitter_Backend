@@ -57,7 +57,7 @@ exports.view = (req, res) => {
             console.log(err)
             res.send({success: false})
         } else {
-            User.findById(decoded['sub'], (err, user) => {
+            User.findById(decoded.sub, (err, user) => {
                 if (err) {
                     res.json({
                         status: "error",

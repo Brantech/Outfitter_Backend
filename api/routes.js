@@ -51,11 +51,11 @@ router.route('/users/:idToken')
 
 
 // Wardrobe routes
-router.route('/wardrobe/:user_id')
+router.route('/wardrobe/:idToken')
     .get(wardrobeController.index)
     .post(wardrobeController.new);
 
-router.route('/wardrobe/:user_id/update/:garment_id')
+router.route('/wardrobe/:idToken/update/:garment_id')
     .get(wardrobeController.view)
     .patch(wardrobeController.update)
     .put(wardrobeController.update)
@@ -68,6 +68,7 @@ router.route('/wardrobe/wardrobecombos/:user_id')
 
 // Survey routes
 router.route('/survey')
+    .get(surveyController.index)
     .post(surveyController.out);
 router.route('/surveyin')
     .post(surveyController.receive)
