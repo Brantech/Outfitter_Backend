@@ -1,22 +1,27 @@
-var CognitoExpress = require('cognito-express');
-var config = require('../config');
-
-const cognitoExpress = new CognitoExpress(config.COGNITO_CONFIG);
+// TODO: Include role-based authentication w/Cognito.
 
 var authorization = function (req, res, next) {
     var token = req.headers['x-access-token'];
 
     if (!token) {
-        var message = {auth: false, message: 'No token provided.'};
-        return res.status(401).send(message);
+        var json = {
+            status: 401,
+            auth: false,
+            message: 'No token provided'
+        };
+        return res.status(401).json(json);
     }
 
-    cognitoExpress.validate(token, function(err, response) {
+    req.app.locals.cognitoExpress.validate(token, function(err, response) {
         if (err) {
-            var message = {auth: false, message: 'Failed to authenticate token.'};
-            return res.status(401).send(message);
+            var json = {
+                status: 401,
+                auth: false, 
+                message: 'Failed to authenticate token'
+            };
+            return res.status(401).json(json);
         }
-        req.app.locals.auth = response;
+        res.locals.auth = response;
         next();
     });
 }

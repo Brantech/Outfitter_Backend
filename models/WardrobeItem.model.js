@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 
-var WardrobeSchema = new mongoose.Schema({
+var WardrobeItemSchema = new mongoose.Schema({
     tags: {
         type: [String]
     },
@@ -22,6 +22,6 @@ var WardrobeSchema = new mongoose.Schema({
     }
 });
 
-var Wardrobe = mongoose.model('Wardrobe', WardrobeSchema);
+var WardrobeItem = mongoose.model('WardrobeItem', WardrobeItemSchema);
 
-module.exports = Wardrobe;
+module.exports = WardrobeItem;

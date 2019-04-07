@@ -1,3 +1,4 @@
+var AmazonCognitoIdentity = require('amazon-cognito-identity-js-node');
 var User = require('../models/User.model');
 
 exports.getUser = async function (id) {
@@ -19,9 +20,9 @@ exports.getUsers = async function (query, limit) {
 
 exports.deleteUser = async function (id) {
     try {
-        var deleted = await User.remove({_id: id});
+        var deleted = await User.deleteOne({_id: id});
         if (deleted.n === 0 && deleted.ok === 1) {
-            throw Error('User could not delete user');
+            throw Error('Error could not delete user');
         }
         return deleted;
     } catch (e) {
@@ -31,21 +32,17 @@ exports.deleteUser = async function (id) {
 
 exports.updateUser = async function (user) {
     var id = user.id;
-
-    // Get the old user
     try {
         var oldUser = await User.findById(id);
+        if (!oldUser) {
+            return false;
+        }
     } catch (e) {
         throw Error('Error occurred while finding the user');
     }
-    if (!oldUser) {
-        return false;
-    }
 
-    // Edit the old user
-    oldUser.username = username;
+    oldUser.username = user.username;
 
-    // Save the updates
     try {
         return await oldUser.save();
     } catch (e) {
@@ -53,13 +50,21 @@ exports.updateUser = async function (user) {
     }
 }
 
-exports.createUser = async function (user) {
-    var newUser = new User({
-        username = user.username
+exports.loginUser = async function (userPool, credentials) {
+    var cognitoUser = new AmazonCognitoIdentity.CognitoUser({
+        Username: credentials.username,
+        Pool: userPool
     });
-    try {
-        return await newUser.save();
-    } catch (e) {
-        throw Error('Error occurred while creating user');
-    }
+    var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails({
+        Username: credentials.username,
+        Password: credentials.password
+    });
+    cognitoUser.authenticateUser(authenticationDetails, {
+        onSuccess: function (result) {
+            return result.getAccessToken().getJwtToken();
+        },
+        onFailure: function (err) {
+            throw Error('Error occurred while logging in user');
+        }
+    });
 }
