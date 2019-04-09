@@ -1,25 +1,17 @@
+var createError = require('http-errors');
+
 // TODO: Include role-based authentication w/Cognito.
 
 var authorization = function (req, res, next) {
     var token = req.headers['x-access-token'];
 
     if (!token) {
-        var json = {
-            status: 401,
-            auth: false,
-            message: 'No token provided'
-        };
-        return res.status(401).json(json);
+        return next(new createError.Unauthorized('missing token'));
     }
 
     req.app.locals.cognitoExpress.validate(token, function(err, response) {
         if (err) {
-            var json = {
-                status: 401,
-                auth: false, 
-                message: 'Failed to authenticate token'
-            };
-            return res.status(401).json(json);
+            return next(new createError.Unauthorized('unauthorized token'));
         }
         res.locals.auth = response;
         next();
