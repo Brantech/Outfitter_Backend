@@ -1,9 +1,12 @@
 var express = require('express');
-var Authorization = require('../auth/authorization');
-var outfits = require('./api/outfit.route');
+var garments = require('./api/garments.route');
+var surveys = require('./api/surveys.route');
+var users = require('./api/user.route');
 
 var router = express.Router();
 
-router.use('/outfits', Authorization, outfits);
+router.use('/garments', garments);
+router.use('/survey', surveys);
+router.use('/users', users);
 
 module.exports = router;
