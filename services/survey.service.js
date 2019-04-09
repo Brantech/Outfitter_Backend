@@ -1,28 +1,15 @@
-var Survey = require('../models/Survey.model');
+const Survey = require('../models/Survey.model');
 
-exports.getSurveys = async function (query, limit) {
-    var options = {limit};
-    try {
-        return await Survey.find(query, options);
-    } catch (e) {
-        throw Error('Error while fetching surveys');
+exports.getSurveys = async function (query, project, paginate) {
+    let results = Survey.find(query);
+    if (paginate) {
+        let limit = paginate.limit;
+        let skip = limit * (paginate.page - 1);
+        results = results.skip(skip).limit(limit);
     }
+    return await results;
 }
 
 exports.saveSurvey = async function (survey) {
-    var newSurvey = new Survey({
-        sex: survey.sex,
-        state: survey.state,
-        formality: survey.formality,
-        weather: survey.weather,
-        climate: survey.climate,
-        season: survey.season,
-        created_outfit: survey.createdOutfit,
-        random_outfit: survey.randomOutfit
-    });
-    try {
-        return await newSurvey.save();
-    } catch (e) {
-        throw Error('Error occurred while saving the survey');
-    }
+    return await new Survey(survey).save();
 }
