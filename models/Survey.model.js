@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var isUrl = require('./validators/url.validator');
+var isURL = require('./validators/url.validator');
 
 var SurveySchema = new mongoose.Schema({
     sex: {
@@ -30,12 +30,12 @@ var SurveySchema = new mongoose.Schema({
         top: {
             type: String,
             required: true,
-            validate: isUrl
+            validate: isURL
         },
         bottom: {
             type: String,
             required: true,
-            validate: isUrl
+            validate: isURL
         },
         rating: {
             type: Number,
@@ -46,12 +46,12 @@ var SurveySchema = new mongoose.Schema({
         top: {
             type: String,
             required: true,
-            validate: isUrl
+            validate: isURL
         },
         bottom: {
             type: String,
             required: true,
-            validate: isUrl
+            validate: isURL
         },
         rating: {
             type: Number,
