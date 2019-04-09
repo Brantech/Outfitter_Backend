@@ -7,3 +7,11 @@ var router = express.Router();
 router.get('/', 
     Authorization, 
     GarmentController.getGarments);
+router.post('/', 
+    Authorization, 
+    GarmentController.addGarment);
+router.delete('/:id', 
+    Authorization, 
+    GarmentController.deleteGarment);
+
+module.exports = router;
