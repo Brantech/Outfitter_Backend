@@ -1,9 +1,17 @@
 var mongoose = require('mongoose');
 
-var UserSchema = new mongoose.Schema({
-    
+var UserGarmentSchema = new mongoose.Schema({
+    tags: [String],
+    dateAdded: {
+        type: Date,
+        default: Date.now
+    }
 });
 
-const User = mongoose.model('User', UserSchema);
+var UserSchema = new mongoose.Schema({
+    garments: [UserGarmentSchema]
+});
+
+var User = mongoose.model('User', UserSchema);
 
 module.exports = User;

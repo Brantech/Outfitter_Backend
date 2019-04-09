@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var urlValidator = require('../validators/url.validator');
+var isUrl = require('./validators/url.validator');
 
 var SurveySchema = new mongoose.Schema({
     sex: Number,
@@ -8,25 +8,25 @@ var SurveySchema = new mongoose.Schema({
     weather: Number,
     temperature: Number,
     season: Number,
-    created_outfit: {
+    createdOutfit: {
         top: {
             type: String,
-            validate: urlValidator
+            validate: isUrl
         },
         bottom: {
             type: String,
-            validate: urlValidator
+            validate: isUrl
         },
         rating: Number
     },
-    random_outfit: {
+    randomOutfit: {
         top: {
             type: String,
-            validate: urlValidator
+            validate: isUrl
         },
         bottom: {
             type: String,
-            validate: urlValidator
+            validate: isUrl
         },
         rating: Number
     }

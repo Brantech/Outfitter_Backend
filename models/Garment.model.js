@@ -1,15 +1,15 @@
 var mongoose = require('mongoose');
-var urlValidator = require('../validators/url.validator');
+var isUrl = require('./validators/url.validator');
 
 var GarmentSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true
     },
-    image_source: {
+    imageSource: {
         type: String,
         required: true,
-        validate: urlValidator
+        validate: isUrl
     }
 });
 
