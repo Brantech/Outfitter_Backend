@@ -14,7 +14,7 @@ var authorization = function (req, res, next) {
             return next(new createError.Unauthorized('unauthorized token'));
         }
         res.locals.auth = response;
-        next();
+        return next();
     });
 }
 
