@@ -57,12 +57,12 @@ app.use(function (req, res, next) {
  */
 app.use(function (err, req, res, next) {
     var status = err.status || 500;
-    var message = {
+    var response = {
         status: status,
         message: err.message,
         error: (config.environment === 'development') ? err : {}
     } 
-    return res.status(status).send(message);
+    return res.status(status).json(response);
 });
 
 module.exports = app;
