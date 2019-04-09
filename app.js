@@ -1,7 +1,9 @@
+var AmazonCognitoIdentity = require('amazon-cognito-identity-js-node');
 var colors = require('colors');
 var cors = require('cors');
 var createDebug = require('debug');
 var createError = require('http-errors');
+var CognitoExpress = require('cognito-express');
 var express = require('express');
 var mongoose = require('mongoose');
 var apiRouter = require('./routes/api');
@@ -56,13 +58,11 @@ app.use(function (req, res, next) {
  * Error handler. Handles the generation of error responses.
  */
 app.use(function (err, req, res, next) {
-    var status = err.status || 500;
-    var response = {
-        status: status,
-        message: err.message,
-        error: (config.environment === 'development') ? err : {}
-    } 
-    return res.status(status).json(response);
+    var isDevEnvironment = config.environment === 'development';
+    return res.status(err.status).json({
+        status: err.status,
+        message: (isDevEnvironment || err.expose ? err.message : ""),
+    });
 });
 
 module.exports = app;
