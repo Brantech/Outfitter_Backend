@@ -16,7 +16,7 @@ router.get('/',
     ControllerHandler(
         UserController.getUsers,
         (req, res, next) => [
-            req.locals.auth.sub,
+            res.locals.auth.sub,
             req.query.limit ? parseInt(req.query.limit) : undefined,
             req.query.offset ? parseInt(req.query.offset) : undefined
         ]
@@ -27,7 +27,7 @@ router.post('/',
     ControllerHandler(
         UserController.newUser,
         (req, res, next) => [
-            req.locals.auth.sub,
+            res.locals.auth.sub,
         ]
     )
 );
@@ -36,7 +36,7 @@ router.delete('/',
     ControllerHandler(
         UserController.deleteUser,
         (req, res, next) => [
-            req.locals.auth.sub,
+            res.locals.auth.sub,
         ]
     )
 );
@@ -51,7 +51,7 @@ router.get('/garments',
     ControllerHandler(
         UserController.getUserGarments,
         (req, res, next) => [
-            req.locals.auth.sub,
+            res.locals.auth.sub,
             req.query.limit ? parseInt(req.query.limit) : undefined,
             req.query.offset ? parseInt(req.query.offset) : undefined
         ]
@@ -62,7 +62,7 @@ router.post('/garments',
     ControllerHandler(
         UserController.addUserGarment,
         (req, res, next) => [
-            req.locals.auth.sub,
+            res.locals.auth.sub,
             req.body
         ]
     )
@@ -72,7 +72,7 @@ router.put('/garments/:id',
     ControllerHandler(
         UserController.updateUserGarmentTags,
         (req, res, next) => [
-            req.locals.auth.sub,
+            res.locals.auth.sub,
             req.params.id,
             req.body
         ]
@@ -83,7 +83,7 @@ router.delete('/garments/:id',
     ControllerHandler(
         UserController.deleteUserGarment,
         (req, res, next) => [
-            req.locals.auth.sub,
+            res.locals.auth.sub,
             req.params.id,
         ]
     )
@@ -96,7 +96,7 @@ router.get('/history',
     ControllerHandler(
         UserController.getUserHistory,
         (req, res, next) => [
-            req.locals.auth.sub,
+            res.locals.auth.sub,
         ]
     )
 );
