@@ -17,6 +17,7 @@ router.get('/', (req, res) =>
 var garmentController = require('./controllers/garmentController');
 var userController = require('./controllers/userController');
 var wardrobeController = require('./controllers/wardrobeController');
+var outfitController = require('./controllers/outfitController')
 var surveyController = require('./controllers/surveyController');
 
 
@@ -61,9 +62,19 @@ router.route('/wardrobe/:idToken/update/:garment_id')
     .put(wardrobeController.update)
     .delete(wardrobeController.delete);
 
-router.route('/wardrobe/wardrobecombos/:user_id')
+router.route('/wardrobe/wardrobecombos/:idToken')
     .get(wardrobeController.combine);
 
+
+// Outfit routes
+router.route('/outfit/')
+    .get(outfitController.index);
+
+router.route('/outfit/:idToken')
+    .get(outfitController.viewAll)
+    .post(outfitController.new)
+    .put(outfitController.update)
+    .delete(outfitController.delete);
 
 
 // Survey routes

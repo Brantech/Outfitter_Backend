@@ -13,6 +13,11 @@ var wardrobeSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    src: {
+        type: String,
+        required: true,
+        default: 0
+    },
     dateAdded: {
         type: Date,
         default: Date.now

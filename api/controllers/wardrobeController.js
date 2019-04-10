@@ -9,50 +9,47 @@ let jwkToPem = require('jwk-to-pem');
 
 // Get all combinations
 exports.combine = (req, res) => {
-    jwt.verify(req.params.user_id, jwkToPem(res.locals.jwk.keys[1]), {algorithms: ['RS256']}, (err, decoded) => {
+    jwt.verify(req.params.idToken, jwkToPem(res.locals.jwk.keys[0]), {algorithms: ['RS256']}, (err, decoded) => {
         if(err) {
             console.log(err)
-        }
-        else {
-            console.log(decoded);
-            res.send(decoded)
-        }
-    });
-    Wardrobe.get((err, wardrobeItems) => {
-        if (err) {
             res.json({
-                status: "error",
-                message: err,
+                success: false,
+                err: err
             });
         }
         else {
-            var list = 
             Wardrobe.find({
-                owner_id: req.params.user_id
+                owner_id: decoded.sub
             })
             .exec((err, wardrobes) => {
-                var shirts = new Array();
-                var pants = new Array();
-                var combos = new Array();
-    
-                for(var i = 0; i < wardrobes.length; i++) {
-                    if(wardrobes[i].type == 'shirt') {
-                        shirts.push(wardrobes[i]);
+                if(err == null) {
+                    var tops = new Array();
+                    var bottoms = new Array();
+                    var combos = new Array();
+        
+                    for(var i = 0; i < wardrobes.length; i++) {
+                        if(wardrobes[i].type == 'top') {
+                            tops.push(wardrobes[i]);
+                        }
+                        if(wardrobes[i].type == 'bottom') {
+                            bottoms.push(wardrobes[i]);
+                        }
                     }
-                    if(wardrobes[i].type == 'pants') {
-                        pants.push(wardrobes[i]);
+                    for(var i = 0; i < tops.length; i++) {
+                        for(var j = 0; j < bottoms.length; j++) {
+                            combos.push([tops[i], bottoms[j]]);
+                        }
                     }
+                    res.json({
+                        success: true,
+                        data: combos
+                    });
+                } else {
+                    res.json({
+                        success: false,
+                        err: err
+                    });
                 }
-                for(var i = 0; i < shirts.length; i++) {
-                    for(var j = 0; j < pants.length; j++) {
-                        combos.push([shirts[i], pants[j]]);
-                    }
-                }
-                res.json({
-                    status: "success",
-                    message: "Wardrobe combinations retrieved successfully",
-                    data: combos
-                });
             });
         }
     });
@@ -107,6 +104,7 @@ exports.new = (req, res) => {
                             wardrobeItem.owner_id = decoded.sub;
                             wardrobeItem.garment_id = req.body.garment_id;
                             wardrobeItem.type = garment[0].type;
+                            wardrobeItem.src = req.body.src;
                             if(req.body.tags) {
                                 wardrobeItem.tags = req.body.tags;
                             }
