@@ -22,7 +22,6 @@ router.get('/',
         ]
     )
 );
-
 router.post('/',
     Authorization,
     ControllerHandler(
@@ -32,7 +31,6 @@ router.post('/',
         ]
     )
 );
-
 router.delete('/',
     Authorization,
     ControllerHandler(
