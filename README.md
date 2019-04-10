@@ -1,14 +1,22 @@
-To test, run 'docker-compose build' at the root, and then 'docker-compose up'
+# Outfittr API
 
-Routes for testing:
+## Route Overview
 
-    - /garments                         - GET, POST
-    - /garments/:garment_id             - GET, PATCH, PUT, DELETE
-    - /garmentcombos                    - GET
+### Users
 
-    - /users                            - GET, POST
-    - /users/:user_id                   - GET, PATCH, PUT, DELETE
+- api/users
+- api/users/register
+- api/users/login
+- api/users/info
+- api/users/garments
+- api/users/recommendations
+- api/users/history
 
-    - /wardrobe/:user_id                - GET, POST
-    - /wardrobe/update/:wardrobe_id     - GET, PATCH, PUT, DELETE
-    - /wardrobe/wardrobecombos/:user_id - GET
+### Surveys
+
+- api/surveys
+- api/surveys/generate
+
+### Garments
+
+- api/garments
