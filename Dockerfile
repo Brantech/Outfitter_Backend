@@ -1,11 +1,8 @@
 FROM node:8.12-jessie
 
 WORKDIR /usr/src/
-
-COPY package*.json ./
-
+COPY package.json package-lock.json ./
 RUN npm install
-
 COPY . .
 
 EXPOSE 3000

@@ -1,27 +1,55 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+var AmazonCognitoIdentity = require('amazon-cognito-identity-js-node');
+var colors = require('colors');
+var cors = require('cors');
+var createDebug = require('debug');
+var createError = require('http-errors');
+var CognitoExpress = require('cognito-express');
+var express = require('express');
+var mongoose = require('mongoose');
+var apiRouter = require('./routes/api');
+var config = require('./config');
 
-const app = express();
+var app = express();
+var debug = createDebug(config.debugId);
 
-// Import routes from routes.js
-let apiRoutes = require("./api/routes");
+/**
+ * Configure express middleware and api route(s).
+ */
+app.use(express.urlencoded({extended: true}));
+app.use(express.json());
+app.use(cors({origin: config.cors.origins}))
+app.use('/api', apiRouter);
 
-var whitelist = ['http://www.outfittr.net', 'http://3.82.31.148']
-var corsOptions = {
-  origin: "*",
-  optionsSuccessStatus: 200
-}
+/**
+ * Used for verifying cognito access tokens.
+ */
+app.locals.cognitoExpress = new CognitoExpress({
+    region: config.cognito.region,
+    cognitoUserPoolId: config.cognito.userPoolId,
+    tokenUse: 'access'
+});
 
-app.use(cors(corsOptions));
-app.options('*', cors());
+/**
+ * Used for querying the system's cognito user pool. 
+ */
+app.locals.cognitoUserPool = new AmazonCognitoIdentity.CognitoUserPool({
+    UserPoolId: config.cognito.userPoolId,
+    ClientId: config.cognito.clientId
+});
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+/**
+ * Connect to MongoDB.
+ */
+mongoose.connect(config.database, {useNewUrlParser: true})
+        .then(() => {
+            debug('Connected to MongoDB successfully');
+        }).catch(() => {
+            debug(colors.red('Error connecting to MongoDB'));
+        });
 
-// Middleware that adds variables that are shared to all routes. This statement must come before any statements adding
-// routes or this middleware will not be used by them.
+/**
+ * Generate a 404 and forward the error to the primary error handler.
+ */
 app.use(function (req, res, next) {
   res.locals = {
     jwk: {
@@ -46,23 +74,19 @@ app.use(function (req, res, next) {
       ]
     },
   };
-
-  next();
+    next(createError(404));
 });
 
-app.use('/', apiRoutes);
+/**
+ * Error handler. Handles the generation of error responses.
+ */
+app.use(function (err, req, res, next) {
+    var isDevEnvironment = config.environment === 'development';
+    return res.status(err.status).json({
+        status: err.status,
+        message: isDevEnvironment || err.expose ? err.message : 'Unknown',
+        errors: isDevEnvironment ? err.stack : {}
+    });
+});
 
-// Connect to MongoDB using docker image
-mongoose
-  .connect('mongodb://mongo:27017/outfittr', { useNewUrlParser: true })
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.log(err));
-
-// database and port
-var db = mongoose.connection;
-var port = process.env.PORT || 3000;
-
-// Default url
-app.get('/', (req, res) => res.send('Outfittr'));
-
-app.listen(port, () => console.log('Server running on port ' + port));
+module.exports = app;
