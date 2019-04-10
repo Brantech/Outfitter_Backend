@@ -1,39 +1,27 @@
-const createError = require('http-errors');
-const SurveyService = require('../services/survey.service');
-const GarmentService = require('../services/garment.service');
+const Survey = require('../models/Survey.model');
+const Garment = require('../models/Garment.model');
 
-exports.getSurveys = async function (req, res, next) {
-    let paginate = {
-        limit: req.query.limit,
-        page: req.query.page
+exports.getSurveys = async (limit = 10, offset = 0) => {
+    let results = await Survey.find({})
+        .limit(limit)
+        .skip(offset);
+
+    return {
+        message: 'Retrieved survey',
+        data: results
     };
-
-    try {
-        let results = await SurveyService.getSurveys({}, {}, paginate);
-        return res.status(200).json({
-            status: 200,
-            data: results
-        });
-    } catch (e) {
-        return next(createError(500, e));
-    }
 }
 
-exports.saveSurvey = async function (req, res, next) {
-    try {
-        let saved = await SurveyService.saveSurvey(req.body);
-        return res.status(201).json({
-            status: 201,
-            data: saved
-        });
-    } catch (e) {
-        return next(createError(500, e));
-    }
+exports.saveSurvey = async (survey) => {
+    let saved = await new Survey(survey).save();
+
+    return {
+        message: 'Saved survey',
+        data: saved
+    };
 }
 
-exports.generateSurveyData = async function (req, res, next) {
-    let tops = req.query.tops;
-    let bottoms = req.query.bottoms;
+exports.generateSurveyData = async (tops, bottoms) => {
     let queries = [
         {category: 'tops', 
          operations: [{collection: 'wardrobe', amount: tops}, 
@@ -47,27 +35,25 @@ exports.generateSurveyData = async function (req, res, next) {
         outfit: {}
     };
 
-    try {
-        for (let query of queries) {
-            let category = query.category;
-            for (let operation of query.operations) {
-                // Note: $sample may output the same document more than once in its result set.
-                // This issue should be non-existent for our use case, however.
-                // https://docs.mongodb.com/manual/tutorial/iterate-a-cursor/#cursor-isolation
-                let randomGarments = await GarmentService.aggregateGarments([
-                    {$match: {category: category}},
-                    {$sample: {size: operation.amount}},
-                    {$project: {_id: false, imageSource: true}}
-                ]);
-                results[operation.collection][category] = randomGarments;
-            }
+    for (let query of queries) {
+        let category = query.category;
+        for (let operation of query.operations) {
+            // Note: $sample may output the same document more than once in its result set.
+            // https://docs.mongodb.com/manual/tutorial/iterate-a-cursor/#cursor-isolation
+            // We attempt to mitigate this problem by setting a large quantity as the sample size.
+            let randomGarments = await Garment.aggregate([
+                {$match: {category: category}},
+                {$sample: {size: 100}},
+                {$group: {_id: '$_id', imageSource: {$addToSet: "$imageSource"}}},
+                {$project: {_id: false, imageSource: {$arrayElemAt: ["$imageSource", 0]}}},
+                {$limit: operation.amount}
+            ]);
+            results[operation.collection][category] = randomGarments;
         }
-        return res.status(200).json({
-            status: 200,
-            message: 'Generated survey data',
-            data: results
-        });
-    } catch (e) {
-        return next(createError(500, e));
     }
+
+    return {
+        message: 'Generated survey data',
+        data: results
+    };
 }

@@ -61,7 +61,8 @@ app.use(function (err, req, res, next) {
     var isDevEnvironment = config.environment === 'development';
     return res.status(err.status).json({
         status: err.status,
-        message: (isDevEnvironment || err.expose ? err.message : ""),
+        message: isDevEnvironment || err.expose ? err.message : 'Unknown',
+        errors: isDevEnvironment ? err.stack : {}
     });
 });
 

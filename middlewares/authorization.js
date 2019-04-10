@@ -1,10 +1,10 @@
-var createError = require('http-errors');
+const createError = require('http-errors');
 
 // TODO: Include role-based authentication w/Cognito.
 
-var authorization = function (req, res, next) {
-    var token = req.headers['x-access-token'];
-
+const authorization = function (req, res, next) {
+    let token = req.headers['x-access-token'];
+    
     if (!token) {
         return next(new createError.Unauthorized('missing token'));
     }

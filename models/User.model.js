@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
+var ObjectId = require('mongoose').Schema.Types.ObjectId;
 
-var UserGarmentSchema = new mongoose.Schema({
+var OwnedGarmentSchema = new mongoose.Schema({
     tags: [String],
     dateAdded: {
         type: Date,
@@ -8,8 +9,17 @@ var UserGarmentSchema = new mongoose.Schema({
     }
 });
 
+var WornOutfitSchema = new mongoose.Schema({
+    garments: [ObjectId],
+    dateWorn: {
+        type: Date,
+        default: Date.now
+    }
+});
+
 var UserSchema = new mongoose.Schema({
-    garments: [UserGarmentSchema]
+    garments: [OwnedGarmentSchema],
+    history: [WornOutfitSchema]
 });
 
 var User = mongoose.model('User', UserSchema);
