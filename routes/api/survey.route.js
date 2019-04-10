@@ -8,8 +8,8 @@ var router = express.Router();
 // api/survey ---------------------------------------------------------------------
 
 router.get('/', [
-        check.query('limit').isInt({$gt: 0}).optional(),
-        check.query('offset').isInt({$gt: -1}).optional()
+        check.query('limit').isInt({min: 0}).optional(),
+        check.query('offset').isInt({min: 0}).optional()
     ],
     ControllerHandler(
         SurveyController.getSurveys,
@@ -19,7 +19,20 @@ router.get('/', [
         ]
     )
 );
-router.post('/',
+router.post('/', [
+        check.body('sex').isInt({min: 0, max: 1}),
+        check.body('state').isInt({min: 0, max: 49}),
+        check.body('formality').isInt({min: 0, max: 10}),
+        check.body('season').isInt({min: 0, max: 3}),
+        check.body('temperature').isInt({min: 0, max: 2}),
+        check.body('weather').isInt({min: 0, max: 3}),
+        check.body('createdOutfit.top').isURL(),
+        check.body('createdOutfit.bottom').isURL(),
+        check.body('createdOutfit.rating').isInt({min: 1, max: 5}),
+        check.body('randomOutfit.top').isURL(),
+        check.body('randomOutfit.bottom').isURL(),
+        check.body('randomOutfit.rating').isInt({min: 1, max: 5})
+    ],
     ControllerHandler(
         SurveyController.saveSurvey,
         (req, res, next) => [
@@ -31,8 +44,8 @@ router.post('/',
 // api/survey/generate ------------------------------------------------------------
 
 router.get('/generate', [
-        check.query('tops').isInt({$gt: 0, $lt: 10}),
-        check.query('bottoms').isInt({$gt: 0, $lt: 10}),
+        check.query('tops').isInt({min: 1, max: 10}),
+        check.query('bottoms').isInt({min: 1, max: 10}),
     ],
     ControllerHandler(
         SurveyController.generateSurveyData,

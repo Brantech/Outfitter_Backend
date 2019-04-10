@@ -10,8 +10,8 @@ var router = express.Router();
 
 router.get('/',
     Authorization, [
-        check.query('limit').isInt({$gt: 0}).optional(),
-        check.query('offset').isInt({$gt: -1}).optional()
+        check.query('limit').isInt({min: 0}).optional(),
+        check.query('offset').isInt({min: 0}).optional()
     ],
     ControllerHandler(
         UserController.getUsers,
@@ -47,8 +47,8 @@ router.delete('/',
 
 router.get('/garments',
     Authorization, [
-        check.query('limit').optional().isInt({$gt: 0}),
-        check.query('offset').optional().isInt({$gt: -1})
+        check.query('limit').isInt({min: 0}).optional(),
+        check.query('offset').isInt({min: 0}).optional()
     ],
     ControllerHandler(
         UserController.getUserGarments,

@@ -10,8 +10,8 @@ var router = express.Router();
 
 router.get('/', 
     Authorization, [
-        check.query('limit').isInt({$gt: 0}).optional(),
-        check.query('offset').isInt({$gt: -1}).optional()
+        check.query('limit').isInt({min: 0}).optional(),
+        check.query('offset').isInt({min: 0}).optional()
     ],
     ControllerHandler(
         GarmentController.getGarments, 
