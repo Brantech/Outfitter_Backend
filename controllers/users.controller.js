@@ -1,12 +1,21 @@
 const User = require('../models/User.model');
 
+exports.getUser = async (userId) => {
+    let user = User.findById(userId);
+
+    return {
+        success: true,
+        data: user
+    }
+}
+
 exports.getUsers = async (limit = 10, offset = 0) => {
     let users = await User.find({})
         .limit(limit)
         .skip(offset);
 
     return {
-        message: 'Retrieved users',
+        success: true,
         data: users
     };
 }
@@ -18,20 +27,8 @@ exports.getUserGarments = async (userId, limit = 10, offset = 0) => {
     );
     
     return {
-        message: 'Retrieved user garments',
+        success: true,
         data: userGarments
-    }
-}
-
-exports.updateUserGarmentTags = async (userId, garmentId, requestBody) => {
-    let updatedUser = await User.findOneAndUpdate(
-        {_id: userId, 'garments._id': garmentId }, 
-        {garments: {$set: {'garments.$.tags': requestBody.tags}}}
-    )
-
-    return {
-        message: 'Updated user garment tags',
-        data: updatedUser
     }
 }
 
@@ -47,27 +44,21 @@ exports.addUserGarment = async (userId, requestBody) => {
     }
 }
 
-exports.deleteUserGarment = async (userId, garmentId) => {
-    let updatedUser = await User.findByIdAndUpdate(
-        userId,
-        {$pull: {garments: {_id: garmentId}}}
-    );
-    
+exports.deleteUser = async (userId) => {
+    let deleted = await User.findByIdAndDelete(userId);
+
     return {
-        status: 200,
-        message: 'Deleted user garment',
-        data: updatedUser
+        success: true,
+        data: deleted
     }
 }
 
-exports.getUserHistory = async (userId, limit = 10, offset = 0) => {
-    let foundHistory = await User.findById(
-        userId, 
-        {history: {$slice: [offset, limit]}}
-    );
+exports.newUser = async (userId) => {
+    let created = new User();
+    created._id = userId;
 
     return {
-        message: 'Retrieved user history',
-        data: foundHistory
+        success: true,
+        data: created
     }
 }
