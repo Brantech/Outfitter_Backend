@@ -2,6 +2,7 @@ const express = require('express');
 const check = require('express-validator/check');
 const Authorization = require('../../middlewares/authorization');
 const ControllerHandler = require('../../middlewares/controller.handler');
+const {parseOptionalInt} = require('../../utils/parse');
 const UserController = require('../../controllers/users.controller');
 
 var router = express.Router();
@@ -17,8 +18,8 @@ router.get('/',
         UserController.getUsers,
         (req, res, next) => [
             res.locals.auth.sub,
-            req.query.limit ? parseInt(req.query.limit) : undefined,
-            req.query.offset ? parseInt(req.query.offset) : undefined
+            parseOptionalInt(req.query.limit),
+            parseOptionalInt(req.query.offset)
         ]
     )
 );
@@ -52,8 +53,8 @@ router.get('/garments',
         UserController.getUserGarments,
         (req, res, next) => [
             res.locals.auth.sub,
-            req.query.limit ? parseInt(req.query.limit) : undefined,
-            req.query.offset ? parseInt(req.query.offset) : undefined
+            parseOptionalInt(req.query.limit),
+            parseOptionalInt(req.query.offset)
         ]
     )
 );

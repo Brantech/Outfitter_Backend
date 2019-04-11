@@ -3,6 +3,7 @@ const check = require('express-validator/check');
 const Authorization = require('../../middlewares/authorization');
 const ControllerHandler = require('../../middlewares/controller.handler');
 const GarmentController = require('../../controllers/garments.controller');
+const {parseOptionalInt} = require('../../utils/parse');
 
 var router = express.Router();
 
@@ -16,8 +17,8 @@ router.get('/',
     ControllerHandler(
         GarmentController.getGarments, 
         (req, res, next) => [
-            req.query.limit ? parseInt(req.query.limit) : undefined,
-            req.query.offset ? parseInt(req.query.offset) : undefined
+            parseOptionalInt(req.query.limit),
+            parseOptionalInt(req.query.offset)
         ]
     )
 );
