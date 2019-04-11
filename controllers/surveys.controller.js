@@ -23,10 +23,10 @@ exports.saveSurvey = async (survey) => {
 
 exports.generateSurveyData = async (tops, bottoms) => {
     let queries = [
-        {category: 'tops', 
+        {category: 'top', 
          operations: [{collection: 'wardrobe', amount: tops}, 
                       {collection: 'outfit', amount: 1}]},
-        {category: 'bottoms', 
+        {category: 'bottom', 
          operations: [{collection: 'wardrobe', amount: bottoms}, 
                       {collection: 'outfit', amount: 1}]}
     ];
