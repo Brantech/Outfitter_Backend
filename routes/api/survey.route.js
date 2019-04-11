@@ -2,6 +2,7 @@ const express = require('express');
 const check = require('express-validator/check');
 const ControllerHandler = require('../../middlewares/controller.handler');
 const SurveyController = require('../../controllers/surveys.controller');
+const {parseOptionalInt} = require('../../utils/parse');
 
 var router = express.Router();
 
@@ -14,8 +15,8 @@ router.get('/', [
     ControllerHandler(
         SurveyController.getSurveys,
         (req, res, next) => [
-            req.query.limit ? parseInt(req.query.limit) : undefined,
-            req.query.offset ? parseInt(req.query.offset) : undefined
+            parseOptionalInt(req.query.limit),
+            parseOptionalInt(req.query.offset)
         ]
     )
 );
