@@ -22,7 +22,7 @@ router.get('/', [
 router.post('/', [
         check.body('sex').isInt({min: 0, max: 1}),
         check.body('state').isInt({min: 0, max: 49}),
-        check.body('formality').isInt({min: 0, max: 10}),
+        check.body('formality').isInt({min: 1, max: 10}),
         check.body('season').isInt({min: 0, max: 3}),
         check.body('temperature').isInt({min: 0, max: 2}),
         check.body('weather').isInt({min: 0, max: 3}),
