@@ -16,8 +16,8 @@ router.get('/',
     ControllerHandler(
         GarmentController.getGarments, 
         (req, res, next) => [
-            req.query.limit,
-            req.query.offset,
+            req.query.limit ? parseInt(req.query.limit) : undefined,
+            req.query.offset ? parseInt(req.query.offset) : undefined
         ]
     )
 );
