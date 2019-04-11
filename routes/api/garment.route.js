@@ -23,8 +23,8 @@ router.get('/',
     )
 );
 router.post('/', 
-        Authorization,
-        ControllerHandler(
+    Authorization,
+    ControllerHandler(
         GarmentController.addGarment, 
         (req, res, next) => [
             req.body

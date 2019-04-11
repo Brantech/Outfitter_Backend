@@ -4,7 +4,7 @@ var ObjectId = require('mongoose').Schema.Types.ObjectId;
 var OwnedGarmentSchema = new mongoose.Schema({
     garment_id: ObjectId,
     category: String,
-    src: String,
+    imageSource: String,
     tags: [String],
     dateAdded: {
         type: Date,

@@ -4,22 +4,22 @@ import requests
 import boto3
 import json
 
-URL = "http://3.211.39.88:3000/garments/"
+URL = "http://3.211.39.88:3000/api/garments/"
 S3_BUCKET = "https://s3.amazonaws.com/data.outfittr.net/"
 
 def upload():
-    for item in os.listdir(os.path.curdir + '/tops'):
+    for item in os.listdir(os.path.curdir + '/data/tops'):
         
-        params = {'type': 'top', 'src': S3_BUCKET + 'tops/' + item}
+        params = {'category': 'top', 'imageSource': S3_BUCKET + 'tops/' + item}
 
-        requests.post(URL, params)
+        response = requests.post(URL, params)
         print('sent ' + item)
 
-    for item in os.listdir(os.path.curdir + '/bottoms'):
+    for item in os.listdir(os.path.curdir + '/data/bottoms'):
         
-        params = {'type': 'bottom', 'src': S3_BUCKET + 'bottoms/' + item}
+        params = {'category': 'bottom', 'imageSource': S3_BUCKET + 'bottoms/' + item}
 
-        requests.post(URL, params)
+        response = requests.post(URL, params)
         print('sent ' + item)
 
 def delete():

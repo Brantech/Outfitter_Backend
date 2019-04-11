@@ -40,10 +40,10 @@ router.delete('/',
         ]
     )
 );
-router.get('/ping',
+router.get('/info',
     Authorization,
     ControllerHandler(
-        UserController.getUser,
+        UserController.getUserInfo,
         (req, res, next) => [
             res.locals.auth.sub
         ]
