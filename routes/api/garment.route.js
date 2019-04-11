@@ -10,20 +10,21 @@ var router = express.Router();
 
 router.get('/', 
     Authorization, [
-        check.query('limit').isInt({min: 0}).optional(),
+        check.query('limit').isInt({min: 0}).optional(), 
         check.query('offset').isInt({min: 0}).optional()
     ],
     ControllerHandler(
         GarmentController.getGarments, 
         (req, res, next) => [
             req.query.limit ? parseInt(req.query.limit) : undefined,
-            req.query.offset ? parseInt(req.query.offset) : undefined
+            req.query.offset ? parseInt(req.query.offset) : undefined,
+            req.query.category ? req.query.category : null
         ]
     )
 );
 router.post('/', 
-    Authorization,
-    ControllerHandler(
+        Authorization,
+        ControllerHandler(
         GarmentController.addGarment, 
         (req, res, next) => [
             req.body

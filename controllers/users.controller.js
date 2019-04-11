@@ -1,7 +1,7 @@
 const User = require('../models/User.model');
 
 exports.getUser = async (userId) => {
-    let user = User.findById(userId);
+    let user = await User.findById(userId);
 
     return {
         success: true,
@@ -35,12 +35,52 @@ exports.getUserGarments = async (userId, limit = 10, offset = 0) => {
 exports.addUserGarment = async (userId, requestBody) => {
     let foundUser = await User.findById(userId);
     foundUser.garments.push(requestBody);
-    let updatedUser = user.save();
+    let updatedUser = await foundUser.save();
 
     return {
         status: 200,
-        message: 'Updated user garment',
+        success: true,
         data: updatedUser
+    }
+}
+
+exports.updateUserGarmentTags = async (userId, garmentId, requestBody) => {
+    let foundUser = await User.findById(userId);
+    let index = null;
+
+    for(let i = 0; i < foundUser.garments.length; i++) {
+        if(foundUser.garments[i].garment_id == garmentId) {
+            index = i;
+            break;
+        }
+    }
+
+    foundUser.garments[index].tags = requestBody.tags;
+    foundUser = await foundUser.save();
+
+    return {
+        success: true,
+        data: foundUser
+    }
+}
+
+exports.deleteUserGarment = async (userId, garmentId) => {
+    let foundUser = await User.findById(userId);
+    let index = null;
+
+    for(let i = 0; i < foundUser.garments.length; i++) {
+        if(foundUser.garments[i].garment_id == garmentId) {
+            index = i;
+            break;
+        }
+    }
+
+    foundUser.garments.splice(index, 1);
+    foundUser = await foundUser.save();
+
+    return {
+        success: true,
+        data: foundUser
     }
 }
 
@@ -54,8 +94,17 @@ exports.deleteUser = async (userId) => {
 }
 
 exports.newUser = async (userId) => {
+    let foundUser = await User.findById(userId);
+    
+    if(foundUser !== null) {
+        return {
+            success: true,
+        }
+    }
+
     let created = new User();
     created._id = userId;
+    created.save();
 
     return {
         success: true,

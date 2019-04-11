@@ -12,11 +12,18 @@ exports.getGarment = async (garmentId) => {
 }
 
 // Get all garments
-exports.getGarments = async (limit = 10, offset = 0) => {
-    let results = await Garment.find({})
+exports.getGarments = async (limit = 10, offset = 0, category = null) => {
+    let results = null;
+    
+    if(category == null) {
+        results = await Garment.find({})
         .limit(limit)
         .skip(offset);
-    
+    } else {
+        results = await Garment.find({category: category})
+        .limit(limit)
+        .skip(offset);
+    }
     return {
         success: true,
         data: results

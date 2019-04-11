@@ -40,7 +40,15 @@ router.delete('/',
         ]
     )
 );
-
+router.get('/ping',
+    Authorization,
+    ControllerHandler(
+        UserController.getUser,
+        (req, res, next) => [
+            res.locals.auth.sub
+        ]
+    )
+)
 // api/users/garments ------------------------------------------------------------
 
 router.get('/garments',
