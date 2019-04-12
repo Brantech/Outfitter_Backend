@@ -12,7 +12,7 @@ var OwnedGarmentSchema = new mongoose.Schema({
     }
 });
 
-var WornOutfitSchema = new mongoose.Schema({
+var OutfitSchema = new mongoose.Schema({
     garments: [ObjectId],
     rating: {
         type: Number,
@@ -50,7 +50,8 @@ var UserSchema = new mongoose.Schema({
         required: true
     },
     garments: [OwnedGarmentSchema],
-    history: [WornOutfitSchema]
+    outfits: [OutfitSchema],
+    history: [OutfitSchema]
 });
 
 var User = mongoose.model('User', UserSchema);

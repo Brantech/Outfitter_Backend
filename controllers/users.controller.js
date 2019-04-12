@@ -111,3 +111,62 @@ exports.newUser = async (userId) => {
         data: created
     }
 }
+
+exports.generateOutfits = async (userId, params, limit = 10, offset = 0, random = false) => {
+    let foundUser = await User.findById(userId);
+
+    // TODO: IDK how the outfit objects are supposed to be formatted to conform to the machine learning stuff so I'll do it like this for now
+    let outfits = [];
+
+    let tops = foundUser.garments.filter((x) => x.category === 'top')
+    let bottoms = foundUser.garments.filter((x) => x.category === 'bottom')
+
+    for(let i = 0; i < tops.length; i++) {
+        for(let j = 0; j < bottoms.length; j++) {
+            outfits.push([tops[i], bottoms[j]]);
+        }
+    }
+
+    if(random) {
+        return {
+            success: true,
+            data: outfits.splice(offset, limit)
+        }
+    } else {
+        // TODO: The ai stuff
+    }
+}
+
+exports.addOutfit = async ( userId, outfit) => {
+    let foundUser = await User.findById(userId);
+    foundUser.outfits.push(outfit);
+    let updatedUser = await foundUser.save();
+
+    return {
+        status: 200,
+        success: true,
+        data: updatedUser
+    }
+}
+
+exports.deleteOutfit = async ( userId, outfit) => {
+    let foundUser = await User.findById(userId);
+    
+    let index = -1;
+    for(let i = 0; i < foundUser.outfits.length; i++) {
+        if(foundUser.outfits[i]._id == outfit) {
+            index = i;
+        }
+    }
+
+    if(index != -1) {
+        foundUser.outfits.splice(index, 1);
+        await foundUser.save();
+    }
+
+    return {
+        status: 200,
+        success: true,
+        data: foundUser
+    }
+}

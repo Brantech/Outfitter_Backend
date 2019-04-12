@@ -6,7 +6,7 @@ const GarmentController = require('../../controllers/garments.controller');
 
 var router = express.Router();
 
-// api/garment --------------------------------------------------------------------
+// api/garments --------------------------------------------------------------------
 
 router.get('/', 
     Authorization, [

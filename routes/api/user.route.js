@@ -97,10 +97,54 @@ router.delete('/garments/:id',
     )
 );
 
+router.get('/garments/generateOutfits',
+    Authorization, [
+        check.query('limit').isInt({min: 0}).optional(),
+        check.query('offset').isInt({min: 0}).optional()
+    ],
+    ControllerHandler(
+        UserController.generateOutfits,
+        (req, res, next) => [
+            res.locals.auth.sub,
+            req.body,
+            req.query.limit ? parseInt(req.query.limit) : undefined,
+            req.query.offset ? parseInt(req.query.offset) : undefined,
+            req.query.random,
+        ]
+    )
+);
+
+// api/users/outfits ------------------------------------------------------------
+
+router.post('/outfits',
+    Authorization,
+    ControllerHandler(
+        UserController.addOutfit,
+        (req, res, next) => [
+            res.locals.auth.sub,
+            req.body
+        ]
+    )
+)
+
+router.delete('/outfits/:id',
+    Authorization,
+    ControllerHandler(
+        UserController.deleteOutfit,
+        (req, res, next) => [
+            res.locals.auth.sub,
+            req.params.id
+        ]
+    )
+)
+
 // api/users/history ------------------------------------------------------------
 
 router.get('/history',
-    Authorization,
+    Authorization, [
+        check.query('limit').isInt({min: 0}).optional(),
+        check.query('offset').isInt({min: 0}).optional()
+    ],
     ControllerHandler(
         UserController.getUserHistory,
         (req, res, next) => [
