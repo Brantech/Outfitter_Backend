@@ -2,7 +2,7 @@ const express = require('express');
 const check = require('express-validator/check');
 const Authorization = require('../../middlewares/authorization');
 const ControllerHandler = require('../../middlewares/controller.handler');
-const {parseOptionalInt} = require('../../utils/parse');
+const {parseOptionalInt} = require('./utils/arguments');
 const UserController = require('../../controllers/users.controller');
 
 var router = express.Router();

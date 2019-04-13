@@ -3,7 +3,7 @@ const check = require('express-validator/check');
 const Authorization = require('../../middlewares/authorization');
 const ControllerHandler = require('../../middlewares/controller.handler');
 const GarmentController = require('../../controllers/garments.controller');
-const {parseOptionalInt} = require('../../utils/parse');
+const {parseOptionalInt} = require('./utils/arguments');
 
 var router = express.Router();
 

@@ -1,14 +1,10 @@
 const Survey = require('../models/Survey.model');
 const Garment = require('../models/Garment.model');
 
-exports.getSurveys = async (limit, offset) => {
-    let query = Survey.find({});
-
+exports.getSurveys = async (limit, offset = 0) => {
+    let query = Survey.find({}).skip(offset);
     if (limit) {
         query.limit(limit)
-    }
-    if (offset) {
-        query.skip(offset);
     }
 
     let results = await query;

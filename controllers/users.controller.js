@@ -9,26 +9,31 @@ exports.getUser = async (userId) => {
     }
 }
 
-exports.getUsers = async (limit = 10, offset = 0) => {
-    let users = await User.find({})
-        .limit(limit)
-        .skip(offset);
+exports.getUsers = async (limit, offset = 0) => {
+    let query = User.find({}).skip(offset);
+    if (limit) {
+        query.limit(limit);
+    }
+
+    let results = await query;
 
     return {
-        success: true,
-        data: users
+        message: 'Retrieved users',
+        count: results.length,
+        data: results
     };
 }
 
-exports.getUserGarments = async (userId, limit = 10, offset = 0) => {
-    let userGarments = await User.findById(
-        userId, 
-        {garments: {$slice: [offset, limit]}}
-    );
-    
+exports.getUserGarments = async (userId, limit, offset = 0) => {
+    let range = limit ? [offset, limit] : [offset];
+    let results = await User.findById(
+        userId,
+        {garments: {$slice: range}});
+
     return {
-        success: true,
-        data: userGarments
+        message: 'Retrieved user garments',
+        count: results.garments.length,
+        data: results
     }
 }
 
@@ -38,7 +43,6 @@ exports.addUserGarment = async (userId, requestBody) => {
     let updatedUser = user.save();
 
     return {
-        status: 200,
         message: 'Updated user garment',
         data: updatedUser
     }
