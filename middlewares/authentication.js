@@ -1,8 +1,6 @@
 const createError = require('http-errors');
 
-// TODO: Include role-based authentication w/Cognito.
-
-const authorization = (req, res, next) => {
+const authentication = (req, res, next) => {
     let token = req.headers['x-access-token'];
     
     if (!token) {
@@ -18,4 +16,4 @@ const authorization = (req, res, next) => {
     });
 }
 
-module.exports = authorization;
+module.exports = authentication;

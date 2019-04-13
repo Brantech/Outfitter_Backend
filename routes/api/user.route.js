@@ -1,6 +1,7 @@
 const express = require('express');
 const check = require('express-validator/check');
-const Authorization = require('../../middlewares/authorization');
+const Admin = require('../../middlewares/admin');
+const Authentication = require('../../middlewares/authentication');
 const ControllerHandler = require('../../middlewares/controller.handler');
 const {parseOptionalInt} = require('./utils/arguments');
 const UserController = require('../../controllers/users.controller');
@@ -9,22 +10,29 @@ var router = express.Router();
 
 // api/users ---------------------------------------------------------------------
 
+/**
+ * Returns all users.
+ * Note: Pagination options are available.
+ */
 router.get('/',
-    Authorization, [
+    Authentication, [
         check.query('limit').isInt({min: 0}).optional(),
         check.query('offset').isInt({min: 0}).optional()
     ],
     ControllerHandler(
         UserController.getUsers,
         (req, res, next) => [
-            res.locals.auth.sub,
             parseOptionalInt(req.query.limit),
             parseOptionalInt(req.query.offset)
         ]
     )
 );
+
+/**
+ * Creates a new user.
+ */
 router.post('/',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.newUser,
         (req, res, next) => [
@@ -32,8 +40,12 @@ router.post('/',
         ]
     )
 );
+
+/**
+ * Deletes a user.
+ */
 router.delete('/',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.deleteUser,
         (req, res, next) => [
@@ -44,8 +56,12 @@ router.delete('/',
 
 // api/users/garments ------------------------------------------------------------
 
+/**
+ * Returns a user's garments.
+ * Note: Pagination options are available.
+ */
 router.get('/garments',
-    Authorization, [
+    Authentication, [
         check.query('limit').isInt({min: 0}).optional(),
         check.query('offset').isInt({min: 0}).optional()
     ],
@@ -58,8 +74,12 @@ router.get('/garments',
         ]
     )
 );
+
+/**
+ * Adds a garment to the user's collection of garments.
+ */
 router.post('/garments',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.addUserGarment,
         (req, res, next) => [
@@ -68,8 +88,12 @@ router.post('/garments',
         ]
     )
 );
+
+/**
+ * Updates a garments tags in the user's collection of garments.
+ */
 router.put('/garments/:id',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.updateUserGarmentTags,
         (req, res, next) => [
@@ -79,8 +103,12 @@ router.put('/garments/:id',
         ]
     )
 );
+
+/**
+ * Deletes a garment from the user's collection of garments.
+ */
 router.delete('/garments/:id',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.deleteUserGarment,
         (req, res, next) => [
@@ -92,8 +120,11 @@ router.delete('/garments/:id',
 
 // api/users/history ------------------------------------------------------------
 
+/**
+ * Returns the user's history of worn outfits.
+ */
 router.get('/history',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.getUserHistory,
         (req, res, next) => [

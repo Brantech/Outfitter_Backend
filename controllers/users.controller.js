@@ -1,10 +1,10 @@
 const User = require('../models/User.model');
 
 exports.getUser = async (userId) => {
-    let user = User.findById(userId);
+    let user = User.findOne({_id: userId});
 
     return {
-        success: true,
+        message: 'Retrieved user',
         data: user
     }
 }
@@ -26,8 +26,8 @@ exports.getUsers = async (limit, offset = 0) => {
 
 exports.getUserGarments = async (userId, limit, offset = 0) => {
     let range = limit ? [offset, limit] : [offset];
-    let results = await User.findById(
-        userId,
+    let results = await User.findOne(
+        {_id: userId},
         {garments: {$slice: range}});
 
     return {
@@ -38,7 +38,7 @@ exports.getUserGarments = async (userId, limit, offset = 0) => {
 }
 
 exports.addUserGarment = async (userId, requestBody) => {
-    let foundUser = await User.findById(userId);
+    let foundUser = await User.findOne({_id: userId});
     foundUser.garments.push(requestBody);
     let updatedUser = user.save();
 
@@ -49,7 +49,7 @@ exports.addUserGarment = async (userId, requestBody) => {
 }
 
 exports.deleteUser = async (userId) => {
-    let deleted = await User.findByIdAndDelete(userId);
+    let deleted = await User.findOneAndDelete({_id: userId});
 
     return {
         success: true,
