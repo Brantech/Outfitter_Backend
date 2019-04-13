@@ -1,7 +1,5 @@
-// Import garment model
 const Garment = require('../models/Garment.model');
 
-// Get a specific garment
 exports.getGarment = async (garmentId) => {
     let result = await Garment.findById(garmentId);
 
@@ -11,19 +9,21 @@ exports.getGarment = async (garmentId) => {
     };
 }
 
-// Get all garments
-exports.getGarments = async (limit = 10, offset = 0) => {
-    let results = await Garment.find({})
-        .limit(limit)
-        .skip(offset);
-    
+exports.getGarments = async (limit, offset = 0) => {
+    let query = Garment.find({}).skip(offset);   
+    if (limit) {
+        query.limit(limit);
+    }
+
+    let results = await query;
+
     return {
         success: true,
+        count: results.length,
         data: results
     };
 };
 
-// Handle create garment actions
 exports.addGarment = async (requestBody) => {
     let saved = await new Garment(requestBody).save();
 
@@ -33,7 +33,6 @@ exports.addGarment = async (requestBody) => {
     };
 };
 
-// Handle delete garment
 exports.deleteGarment = async (garmentId) => {
     let deleted = await Garment.findByIdAndDelete(garmentId);
 

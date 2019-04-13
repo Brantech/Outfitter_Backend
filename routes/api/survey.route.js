@@ -2,7 +2,7 @@ const express = require('express');
 const check = require('express-validator/check');
 const ControllerHandler = require('../../middlewares/controller.handler');
 const SurveyController = require('../../controllers/surveys.controller');
-const {parseOptionalInt} = require('../../utils/parse');
+const {parseOptionalInt} = require('./utils/arguments');
 
 var router = express.Router();
 
