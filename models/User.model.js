@@ -49,6 +49,10 @@ var UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    numericId: Number,
+    role: String,
+    sex: Number,
+    state: Number,
     garments: [OwnedGarmentSchema],
     outfits: [OutfitSchema],
     history: [OutfitSchema]

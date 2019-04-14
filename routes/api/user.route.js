@@ -1,29 +1,38 @@
 const express = require('express');
 const check = require('express-validator/check');
-const Authorization = require('../../middlewares/authorization');
+const Admin = require('../../middlewares/admin');
+const Authentication = require('../../middlewares/authentication');
 const ControllerHandler = require('../../middlewares/controller.handler');
+const {parseOptionalInt} = require('./utils/arguments');
 const UserController = require('../../controllers/users.controller');
 
 var router = express.Router();
 
 // api/users ---------------------------------------------------------------------
 
+/**
+ * Returns all users.
+ * Note: Pagination options are available.
+ */
 router.get('/',
-    Authorization, [
+    Authentication, [
         check.query('limit').isInt({min: 0}).optional(),
         check.query('offset').isInt({min: 0}).optional()
     ],
     ControllerHandler(
         UserController.getUsers,
         (req, res, next) => [
-            res.locals.auth.sub,
-            req.query.limit ? parseInt(req.query.limit) : undefined,
-            req.query.offset ? parseInt(req.query.offset) : undefined
+            parseOptionalInt(req.query.limit),
+            parseOptionalInt(req.query.offset)
         ]
     )
 );
+
+/**
+ * Creates a new user.
+ */
 router.post('/',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.newUser,
         (req, res, next) => [
@@ -31,8 +40,12 @@ router.post('/',
         ]
     )
 );
+
+/**
+ * Deletes a user.
+ */
 router.delete('/',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.deleteUser,
         (req, res, next) => [
@@ -41,7 +54,7 @@ router.delete('/',
     )
 );
 router.get('/info',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.getUserInfo,
         (req, res, next) => [
@@ -51,8 +64,12 @@ router.get('/info',
 )
 // api/users/garments ------------------------------------------------------------
 
+/**
+ * Returns a user's garments.
+ * Note: Pagination options are available.
+ */
 router.get('/garments',
-    Authorization, [
+    Authentication, [
         check.query('limit').isInt({min: 0}).optional(),
         check.query('offset').isInt({min: 0}).optional()
     ],
@@ -60,13 +77,17 @@ router.get('/garments',
         UserController.getUserGarments,
         (req, res, next) => [
             res.locals.auth.sub,
-            req.query.limit ? parseInt(req.query.limit) : undefined,
-            req.query.offset ? parseInt(req.query.offset) : undefined
+            parseOptionalInt(req.query.limit),
+            parseOptionalInt(req.query.offset)
         ]
     )
 );
+
+/**
+ * Adds a garment to the user's collection of garments.
+ */
 router.post('/garments',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.addUserGarment,
         (req, res, next) => [
@@ -75,8 +96,12 @@ router.post('/garments',
         ]
     )
 );
+
+/**
+ * Updates a garments tags in the user's collection of garments.
+ */
 router.put('/garments/:id',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.updateUserGarmentTags,
         (req, res, next) => [
@@ -86,8 +111,12 @@ router.put('/garments/:id',
         ]
     )
 );
+
+/**
+ * Deletes a garment from the user's collection of garments.
+ */
 router.delete('/garments/:id',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.deleteUserGarment,
         (req, res, next) => [
@@ -98,7 +127,7 @@ router.delete('/garments/:id',
 );
 
 router.get('/garments/generateOutfits',
-    Authorization, [
+    Authentication, [
         check.query('limit').isInt({min: 0}).optional(),
         check.query('offset').isInt({min: 0}).optional()
     ],
@@ -117,7 +146,7 @@ router.get('/garments/generateOutfits',
 // api/users/outfits ------------------------------------------------------------
 
 router.post('/outfits',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.addOutfit,
         (req, res, next) => [
@@ -128,7 +157,7 @@ router.post('/outfits',
 )
 
 router.put('/outfits/:id',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.updateOutfit,
         (req, res, next) => [
@@ -140,7 +169,7 @@ router.put('/outfits/:id',
 )
 
 router.delete('/outfits/:id',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.deleteOutfit,
         (req, res, next) => [
@@ -151,7 +180,7 @@ router.delete('/outfits/:id',
 )
 
 router.post('/outfits/wear/:id',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.wearOutfit,
         (req, res, next) => [
@@ -163,11 +192,11 @@ router.post('/outfits/wear/:id',
 
 // api/users/history ------------------------------------------------------------
 
+/**
+ * Returns the user's history of worn outfits.
+ */
 router.get('/history',
-    Authorization, [
-        check.query('limit').isInt({min: 0}).optional(),
-        check.query('offset').isInt({min: 0}).optional()
-    ],
+    Authentication,
     ControllerHandler(
         UserController.getUserHistory,
         (req, res, next) => [
@@ -177,7 +206,7 @@ router.get('/history',
 );
 
 router.delete('/history/all',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.clearHistory,
         (req, res, next) => [
@@ -187,7 +216,7 @@ router.delete('/history/all',
 )
 
 router.delete('/history/:id',
-    Authorization,
+    Authentication,
     ControllerHandler(
         UserController.deleteHistoryItem,
         (req, res, next) => [
@@ -196,6 +225,34 @@ router.delete('/history/:id',
         ]
     )
 )
+
+// api/users/recommendations ----------------------------------------------------
+
+/**
+ * Returns outfit recommendations to the user.
+ */
+router.get('/recommendations',
+    Authentication, [
+        check.query('temperature').isInt().exists(),
+        check.query('weather').isInt().exists(),
+        check.query('formality').isInt().exists(),
+        check.query('season').isInt().exists(),
+        check.query('limit').isInt().optional()
+    ],
+    ControllerHandler(
+        UserController.getOutfitRecommendations,
+        (req, res, next) => [
+            res.locals.auth.sub,
+            {
+                temperature: parseInt(req.query.temperature),
+                weather: parseInt(req.query.weather),
+                formality: parseInt(req.query.formality),
+                season: parseInt(req.query.season)
+            },
+            parseOptionalInt(req.query.limit)
+        ]
+    )
+);
 
 // ------------------------------------------------------------------------------
 

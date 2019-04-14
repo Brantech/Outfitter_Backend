@@ -10,6 +10,10 @@ var GarmentSchema = new mongoose.Schema({
         type: String,
         required: true,
         validate: isURL
+    },
+    featureVector: {
+        type: [Number],
+        required: true
     }
 });
 

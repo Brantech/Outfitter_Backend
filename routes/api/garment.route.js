@@ -1,29 +1,40 @@
 const express = require('express');
 const check = require('express-validator/check');
-const Authorization = require('../../middlewares/authorization');
+const Admin = require('../../middlewares/admin');
+const Authentication = require('../../middlewares/authentication');
 const ControllerHandler = require('../../middlewares/controller.handler');
 const GarmentController = require('../../controllers/garments.controller');
+const {parseOptionalInt} = require('./utils/arguments');
 
 var router = express.Router();
 
 // api/garments --------------------------------------------------------------------
 
+/**
+ * Returns all garments stored in the garment catalog.
+ * Note: Pagination options are available.
+ */
 router.get('/', 
-    Authorization, [
-        check.query('limit').isInt({min: 0}).optional(), 
+    Authentication, [
+        check.query('limit').isInt({min: 0}).optional(),
         check.query('offset').isInt({min: 0}).optional()
     ],
     ControllerHandler(
         GarmentController.getGarments, 
         (req, res, next) => [
-            req.query.limit ? parseInt(req.query.limit) : undefined,
-            req.query.offset ? parseInt(req.query.offset) : undefined,
-            req.query.category ? req.query.category : null
+            parseOptionalInt(req.query.limit),
+            parseOptionalInt(req.query.offset)
         ]
     )
 );
+
+/**
+ * Adds a single garment to the garment catalog.
+ * Note: This route is available to admins only.
+ */
 router.post('/', 
-    Authorization,
+    Authentication, 
+    Admin,
     ControllerHandler(
         GarmentController.addGarment, 
         (req, res, next) => [
@@ -31,8 +42,12 @@ router.post('/',
         ]
     )
 );
+
+/**
+ * Returns a single garment from the garment catalog.
+ */
 router.get('/:id', 
-    Authorization, 
+    Authentication,
     ControllerHandler(
         GarmentController.getGarment, 
         (req, res, next) => [
@@ -40,8 +55,14 @@ router.get('/:id',
         ]
     )
 );
+
+/**
+ * Deletes a single garment from the garment catalog.
+ * Note: This route is available to admins only.
+ */
 router.delete('/:id', 
-    Authorization,
+    Authentication, 
+    Admin,
     ControllerHandler(
         GarmentController.deleteGarment, 
         (req, res, next) => [

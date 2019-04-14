@@ -7,6 +7,7 @@ module.exports = {
         clientId: '2qlg1os2kkpdbulfhlt48cptq4'
     },
     database: 'mongodb://mongo:27017/outfittr',
+    tfjsModel: 'file://tfjs_artifacts/model.json',
     debugId: 'outfittr-api',
     cors: {
         origins: [/\.outfittr\.net$/]
