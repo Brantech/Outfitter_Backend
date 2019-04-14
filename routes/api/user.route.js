@@ -127,10 +127,33 @@ router.post('/outfits',
     )
 )
 
+router.put('/outfits/:id',
+    Authorization,
+    ControllerHandler(
+        UserController.updateOutfit,
+        (req, res, next) => [
+            res.locals.auth.sub,
+            req.params.id,
+            req.body
+        ]
+    )
+)
+
 router.delete('/outfits/:id',
     Authorization,
     ControllerHandler(
         UserController.deleteOutfit,
+        (req, res, next) => [
+            res.locals.auth.sub,
+            req.params.id
+        ]
+    )
+)
+
+router.post('/outfits/wear/:id',
+    Authorization,
+    ControllerHandler(
+        UserController.wearOutfit,
         (req, res, next) => [
             res.locals.auth.sub,
             req.params.id
@@ -152,6 +175,27 @@ router.get('/history',
         ]
     )
 );
+
+router.delete('/history/all',
+    Authorization,
+    ControllerHandler(
+        UserController.clearHistory,
+        (req, res, next) => [
+            res.locals.auth.sub,
+        ]
+    )
+)
+
+router.delete('/history/:id',
+    Authorization,
+    ControllerHandler(
+        UserController.deleteHistoryItem,
+        (req, res, next) => [
+            res.locals.auth.sub,
+            req.params.id
+        ]
+    )
+)
 
 // ------------------------------------------------------------------------------
 
