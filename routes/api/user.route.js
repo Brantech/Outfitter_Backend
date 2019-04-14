@@ -133,6 +133,34 @@ router.get('/history',
     )
 );
 
+// api/users/recommendations ----------------------------------------------------
+
+/**
+ * Returns outfit recommendations to the user.
+ */
+router.get('/recommendations',
+    Authentication, [
+        check.query('temperature').isInt().exists(),
+        check.query('weather').isInt().exists(),
+        check.query('formality').isInt().exists(),
+        check.query('season').isInt().exists(),
+        check.query('limit').isInt().optional()
+    ],
+    ControllerHandler(
+        UserController.getOutfitRecommendations,
+        (req, res, next) => [
+            res.locals.auth.sub,
+            {
+                temperature: parseInt(req.query.temperature),
+                weather: parseInt(req.query.weather),
+                formality: parseInt(req.query.formality),
+                season: parseInt(req.query.season)
+            },
+            parseOptionalInt(req.query.limit)
+        ]
+    )
+);
+
 // ------------------------------------------------------------------------------
 
 module.exports = router;
