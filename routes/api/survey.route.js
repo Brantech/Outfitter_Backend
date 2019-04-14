@@ -1,5 +1,7 @@
 const express = require('express');
 const check = require('express-validator/check');
+const Admin = require('../../middlewares/admin');
+const Authentication = require('../../middlewares/authentication');
 const ControllerHandler = require('../../middlewares/controller.handler');
 const SurveyController = require('../../controllers/surveys.controller');
 const {parseOptionalInt} = require('./utils/arguments');
@@ -8,7 +10,13 @@ var router = express.Router();
 
 // api/survey ---------------------------------------------------------------------
 
-router.get('/', [
+/**
+ * Returns all submitted surveys.
+ * Note: Pagination options are available; this route is available to admins only.
+ */
+router.get('/', 
+    Authentication, 
+    Admin, [
         check.query('limit').isInt({min: 0}).optional(),
         check.query('offset').isInt({min: 0}).optional()
     ],
@@ -20,6 +28,10 @@ router.get('/', [
         ]
     )
 );
+
+/**
+ * Saves a survey from the survey application.
+ */
 router.post('/', [
         check.body('sex').isInt({min: 0, max: 1}),
         check.body('state').isInt({min: 0, max: 49}),
@@ -44,6 +56,9 @@ router.post('/', [
 
 // api/survey/generate ------------------------------------------------------------
 
+/**
+ * Generates random sets of tops and bottoms for use in the survey application.
+ */
 router.get('/generate', [
         check.query('tops').isInt({min: 1, max: 10}),
         check.query('bottoms').isInt({min: 1, max: 10}),

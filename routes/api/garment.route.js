@@ -1,6 +1,7 @@
 const express = require('express');
 const check = require('express-validator/check');
-const Authorization = require('../../middlewares/authorization');
+const Admin = require('../../middlewares/admin');
+const Authentication = require('../../middlewares/authentication');
 const ControllerHandler = require('../../middlewares/controller.handler');
 const GarmentController = require('../../controllers/garments.controller');
 const {parseOptionalInt} = require('./utils/arguments');
@@ -9,8 +10,12 @@ var router = express.Router();
 
 // api/garment --------------------------------------------------------------------
 
+/**
+ * Returns all garments stored in the garment catalog.
+ * Note: Pagination options are available.
+ */
 router.get('/', 
-    Authorization, [
+    Authentication, [
         check.query('limit').isInt({min: 0}).optional(),
         check.query('offset').isInt({min: 0}).optional()
     ],
@@ -22,8 +27,14 @@ router.get('/',
         ]
     )
 );
+
+/**
+ * Adds a single garment to the garment catalog.
+ * Note: This route is available to admins only.
+ */
 router.post('/', 
-    Authorization,
+    Authentication, 
+    Admin,
     ControllerHandler(
         GarmentController.addGarment, 
         (req, res, next) => [
@@ -31,8 +42,12 @@ router.post('/',
         ]
     )
 );
+
+/**
+ * Returns a single garment from the garment catalog.
+ */
 router.get('/:id', 
-    Authorization, 
+    Authentication,
     ControllerHandler(
         GarmentController.getGarment, 
         (req, res, next) => [
@@ -40,8 +55,14 @@ router.get('/:id',
         ]
     )
 );
+
+/**
+ * Deletes a single garment from the garment catalog.
+ * Note: This route is available to admins only.
+ */
 router.delete('/:id', 
-    Authorization,
+    Authentication, 
+    Admin,
     ControllerHandler(
         GarmentController.deleteGarment, 
         (req, res, next) => [
