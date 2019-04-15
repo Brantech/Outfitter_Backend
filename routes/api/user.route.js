@@ -54,6 +54,20 @@ router.delete('/',
         ]
     )
 );
+
+/**
+ * Allows an admin to delete a user.
+ */
+router.delete('/:id',
+    Authentication,
+    ControllerHandler(
+        UserController.deleteUser,
+        (req, res, next) => [
+            req.params.id,
+        ]
+    )
+);
+
 router.get('/info',
     Authentication,
     ControllerHandler(
