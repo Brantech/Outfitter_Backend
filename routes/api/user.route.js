@@ -37,6 +37,7 @@ router.post('/',
         UserController.newUser,
         (req, res, next) => [
             res.locals.auth.sub,
+            req.body.username
         ]
     )
 );
@@ -56,12 +57,25 @@ router.delete('/',
 router.get('/info',
     Authentication,
     ControllerHandler(
-        UserController.getUserInfo,
+        UserController.getUser,
         (req, res, next) => [
             res.locals.auth.sub
         ]
     )
 )
+
+router.put('/rate',
+    Authentication,
+    ControllerHandler(
+        UserController.rateOutfit,
+        (req, res, next) => [
+            req.body.outfitId,
+            req.body.owner,
+            req.body.rating
+        ]
+    )
+)
+
 // api/users/garments ------------------------------------------------------------
 
 /**
@@ -132,13 +146,12 @@ router.get('/garments/generateOutfits',
         check.query('offset').isInt({min: 0}).optional()
     ],
     ControllerHandler(
-        UserController.generateOutfits,
+        UserController.getOutfitRecommendations,
         (req, res, next) => [
             res.locals.auth.sub,
             req.body,
             req.query.limit ? parseInt(req.query.limit) : undefined,
             req.query.offset ? parseInt(req.query.offset) : undefined,
-            req.query.random,
         ]
     )
 );
@@ -254,6 +267,15 @@ router.get('/recommendations',
     )
 );
 
-// ------------------------------------------------------------------------------
+// api/users/feed ----------------------------------------------------------------
 
+router.get('/feed',
+    Authentication,
+    ControllerHandler(
+        UserController.getSharedOutfits,
+        (req, res, next) => [
+            res.locals.auth.sub,
+        ]
+    )
+);
 module.exports = router;

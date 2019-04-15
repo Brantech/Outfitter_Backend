@@ -11,10 +11,6 @@ var GarmentSchema = new mongoose.Schema({
         required: true,
         validate: isURL
     },
-    featureVector: {
-        type: [Number],
-        required: true
-    }
 });
 
 var Garment = mongoose.model('Garment', GarmentSchema);

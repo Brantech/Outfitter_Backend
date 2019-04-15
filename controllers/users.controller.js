@@ -3,9 +3,10 @@ require('@tensorflow/tfjs-node');
 const config = require('../config');
 const User = require('../models/User.model');
 const Garment = require('../models/Garment.model');
+const fs = require('fs');
 
 exports.getUser = async (userId) => {
-    let user = User.findOne({_id: userId});
+    let user = await User.findOne({_id: userId});
 
     return {
         message: 'Retrieved user',
@@ -101,7 +102,7 @@ exports.deleteUser = async (userId) => {
     }
 }
 
-exports.newUser = async (userId) => {
+exports.newUser = async (userId, username) => {
     let foundUser = await User.findById(userId);
     
     if(foundUser !== null) {
@@ -112,7 +113,9 @@ exports.newUser = async (userId) => {
 
     let created = new User();
     created._id = userId;
-    created.save();
+    created.username = username;
+    await created.setNext('numericId');
+    await created.save();
 
     return {
         success: true,
@@ -124,9 +127,8 @@ exports.getOutfitRecommendations = async (userId, factors, limit = 10) => {
     let user = await User.findOne({_id: userId});
 
     // Get clean garments belonging to the user
-    let cleanGarments = user.garments.filter(garment => {
-        return garment.tags.includes('clean');
-    });
+    let cleanGarments = user.garments.filter(garment => garment.tags.includes('clean'));
+    
     if (cleanGarments.length == 0) {
         return {
             status: 422,
@@ -155,15 +157,22 @@ exports.getOutfitRecommendations = async (userId, factors, limit = 10) => {
     // Generate all possible outfit combinations
     let outfits = [];
     for (top of categorizedGarments.top) {
+        var file = top.imageSource.substring(top.imageSource.lastIndexOf("outfittr.net") + 12);
+        var fv = fs.readFileSync(__dirname + '/../features/' + file + '.json', 'utf8');
+        var topFeatures = JSON.parse(fv);
+
         for (bottom of categorizedGarments.bottom) {
+            var file2 = bottom.imageSource.substring(bottom.imageSource.lastIndexOf("outfittr.net") + 12);
+            var fv2 = fs.readFileSync(__dirname + '/../features/' + file2 + '.json', 'utf8');
+
             outfits.push({
                 top: {
-                    featureVector: top.featureVector,
-                    id: top._id
+                    featureVector: topFeatures,
+                    garment: top
                 },
                 bottom: {
-                    featureVector: bottom.featureVector,
-                    id: bottom._id
+                    featureVector: JSON.parse(fv2),
+                    garment: bottom
                 }
             });
         }
@@ -181,9 +190,9 @@ exports.getOutfitRecommendations = async (userId, factors, limit = 10) => {
     let model = await tf.loadLayersModel(config.tfjsModel);    
     for (outfit of outfits) {
         let tensorValues = [
-            user.state,
-            user.sex,
             user.numericId,
+            factors.state,
+            factors.sex,
             factors.weather,
             factors.temperature,
             factors.formality,
@@ -202,10 +211,10 @@ exports.getOutfitRecommendations = async (userId, factors, limit = 10) => {
         let predictedRating = predictionData[0];
 
         ratedOutfits.push({
-            outfit: {
-                top: outfit.top.id,
-                bottom: outfit.bottom.id
-            },
+            outfit: [
+                outfit.top.garment,
+                outfit.bottom.garment
+            ],
             rating: predictedRating
         });
     }
@@ -342,5 +351,49 @@ exports.clearHistory = async (userId) => {
         status: 200,
         success: true,
         data: foundUser
+    }
+}
+
+exports.getSharedOutfits = async(userId) => {
+    let outfits = [];
+
+    let users = await User.find();
+
+    for(let i = 0; i < users.length; i++) {
+        outfits.push([users[i].username, []]);
+        for(let j = 0; j < users[i].outfits.length; j++) {
+            if(users[i].outfits[j].shared)
+                outfits[i][1].push(users[i].outfits[j]);
+        }
+    }
+
+    return {
+        status: 200,
+        data: outfits.splice(0, 200),
+    }
+}
+
+exports.rateOutfit = async(outfitId, ownerUsr, myRating) => {
+    let owner = await User.findOne({username: ownerUsr});
+
+    let outfit = null;
+    for(let i = 0; i < owner.outfits.length; i++) {
+        if(owner.outfits[i]._id == outfitId) {
+            outfit = i;
+            break;
+        }
+    }
+
+    let rating = owner.outfits[outfit].communityRating * owner.outfits[outfit].numberOfRatings;
+    rating += myRating;
+
+    owner.outfits[outfit].numberOfRatings = owner.outfits[outfit].numberOfRatings + 1;
+    owner.outfits[outfit].communityRating = rating / owner.outfits[outfit].numberOfRatings;
+
+    await owner.save();
+
+    return {
+        status: 200,
+        data: owner.outfits[outfit]
     }
 }
