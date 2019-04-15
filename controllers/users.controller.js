@@ -102,7 +102,7 @@ exports.deleteUser = async (userId) => {
     }
 }
 
-exports.newUser = async (userId, username) => {
+exports.newUser = async (userId, username, role) => {
     let foundUser = await User.findById(userId);
     
     if(foundUser !== null) {
@@ -114,6 +114,7 @@ exports.newUser = async (userId, username) => {
     let created = new User();
     created._id = userId;
     created.username = username;
+    created.role = role;
     await created.setNext('numericId');
     await created.save();
 
