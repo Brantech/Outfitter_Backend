@@ -58,7 +58,7 @@ exports.updateUserGarmentTags = async (userId, garmentId, requestBody) => {
     let index = null;
 
     for(let i = 0; i < foundUser.garments.length; i++) {
-        if(foundUser.garments[i].garment_id == garmentId) {
+        if(foundUser.garments[i]._id == garmentId) {
             index = i;
             break;
         }
