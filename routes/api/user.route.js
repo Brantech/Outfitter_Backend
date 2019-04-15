@@ -37,7 +37,8 @@ router.post('/',
         UserController.newUser,
         (req, res, next) => [
             res.locals.auth.sub,
-            req.body.username
+            req.body.username,
+            req.body.role
         ]
     )
 );
