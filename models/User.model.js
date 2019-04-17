@@ -1,7 +1,10 @@
 var mongoose = require('mongoose');
+var AutoIncrement = require('mongoose-sequence')(mongoose);
 var ObjectId = require('mongoose').Schema.Types.ObjectId;
 
 var OwnedGarmentSchema = new mongoose.Schema({
+    category: String,
+    imageSource: String,
     tags: [String],
     dateAdded: {
         type: Date,
@@ -9,7 +12,7 @@ var OwnedGarmentSchema = new mongoose.Schema({
     }
 });
 
-var WornOutfitSchema = new mongoose.Schema({
+var OutfitSchema = new mongoose.Schema({
     garments: [ObjectId],
     rating: {
         type: Number,
@@ -46,14 +49,18 @@ var UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    username: {
+        type: String,
+        required: true
+    },
     numericId: Number,
     role: String,
-    sex: Number,
-    state: Number,
     garments: [OwnedGarmentSchema],
-    history: [WornOutfitSchema]
+    outfits: [OutfitSchema],
+    history: [OutfitSchema]
 });
 
+UserSchema.plugin(AutoIncrement, {inc_field: 'numericId', disable_hooks: true});
 var User = mongoose.model('User', UserSchema);
 
 module.exports = User;

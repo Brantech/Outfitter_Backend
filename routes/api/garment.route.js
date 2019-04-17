@@ -8,7 +8,7 @@ const {parseOptionalInt} = require('./utils/arguments');
 
 var router = express.Router();
 
-// api/garment --------------------------------------------------------------------
+// api/garments --------------------------------------------------------------------
 
 /**
  * Returns all garments stored in the garment catalog.
@@ -23,7 +23,8 @@ router.get('/',
         GarmentController.getGarments, 
         (req, res, next) => [
             parseOptionalInt(req.query.limit),
-            parseOptionalInt(req.query.offset)
+            parseOptionalInt(req.query.offset),
+            req.query.category
         ]
     )
 );

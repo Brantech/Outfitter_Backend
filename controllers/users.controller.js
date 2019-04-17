@@ -3,9 +3,10 @@ require('@tensorflow/tfjs-node');
 const config = require('../config');
 const User = require('../models/User.model');
 const Garment = require('../models/Garment.model');
+const fs = require('fs');
 
 exports.getUser = async (userId) => {
-    let user = User.findOne({_id: userId});
+    let user = await User.findOne({_id: userId});
 
     return {
         message: 'Retrieved user',
@@ -44,11 +45,51 @@ exports.getUserGarments = async (userId, limit, offset = 0) => {
 exports.addUserGarment = async (userId, requestBody) => {
     let foundUser = await User.findOne({_id: userId});
     foundUser.garments.push(requestBody);
-    let updatedUser = user.save();
+    let updatedUser = await foundUser.save();
 
     return {
         message: 'Updated user garment',
         data: updatedUser
+    }
+}
+
+exports.updateUserGarmentTags = async (userId, garmentId, requestBody) => {
+    let foundUser = await User.findById(userId);
+    let index = null;
+
+    for(let i = 0; i < foundUser.garments.length; i++) {
+        if(foundUser.garments[i]._id == garmentId) {
+            index = i;
+            break;
+        }
+    }
+
+    foundUser.garments[index].tags = requestBody.tags;
+    foundUser = await foundUser.save();
+
+    return {
+        success: true,
+        data: foundUser
+    }
+}
+
+exports.deleteUserGarment = async (userId, garmentId) => {
+    let foundUser = await User.findById(userId);
+    let index = null;
+
+    for(let i = 0; i < foundUser.garments.length; i++) {
+        if(foundUser.garments[i].garment_id == garmentId) {
+            index = i;
+            break;
+        }
+    }
+
+    foundUser.garments.splice(index, 1);
+    foundUser = await foundUser.save();
+
+    return {
+        success: true,
+        data: foundUser
     }
 }
 
@@ -61,9 +102,21 @@ exports.deleteUser = async (userId) => {
     }
 }
 
-exports.newUser = async (userId) => {
+exports.newUser = async (userId, username, role) => {
+    let foundUser = await User.findById(userId);
+    
+    if(foundUser !== null) {
+        return {
+            success: true,
+        }
+    }
+
     let created = new User();
     created._id = userId;
+    created.username = username;
+    created.role = role;
+    await created.setNext('numericId');
+    await created.save();
 
     return {
         success: true,
@@ -75,9 +128,8 @@ exports.getOutfitRecommendations = async (userId, factors, limit = 10) => {
     let user = await User.findOne({_id: userId});
 
     // Get clean garments belonging to the user
-    let cleanGarments = user.garments.filter(garment => {
-        return garment.tags.includes('clean');
-    });
+    let cleanGarments = user.garments.filter(garment => garment.tags.includes('clean'));
+    
     if (cleanGarments.length == 0) {
         return {
             status: 422,
@@ -106,15 +158,22 @@ exports.getOutfitRecommendations = async (userId, factors, limit = 10) => {
     // Generate all possible outfit combinations
     let outfits = [];
     for (top of categorizedGarments.top) {
+        var file = top.imageSource.substring(top.imageSource.lastIndexOf("outfittr.net") + 12);
+        var fv = fs.readFileSync(__dirname + '/../features/' + file + '.json', 'utf8');
+        var topFeatures = JSON.parse(fv);
+
         for (bottom of categorizedGarments.bottom) {
+            var file2 = bottom.imageSource.substring(bottom.imageSource.lastIndexOf("outfittr.net") + 12);
+            var fv2 = fs.readFileSync(__dirname + '/../features/' + file2 + '.json', 'utf8');
+
             outfits.push({
                 top: {
-                    featureVector: top.featureVector,
-                    id: top._id
+                    featureVector: topFeatures,
+                    garment: top
                 },
                 bottom: {
-                    featureVector: bottom.featureVector,
-                    id: bottom._id
+                    featureVector: JSON.parse(fv2),
+                    garment: bottom
                 }
             });
         }
@@ -132,9 +191,9 @@ exports.getOutfitRecommendations = async (userId, factors, limit = 10) => {
     let model = await tf.loadLayersModel(config.tfjsModel);    
     for (outfit of outfits) {
         let tensorValues = [
-            user.state,
-            user.sex,
             user.numericId,
+            factors.state,
+            factors.sex,
             factors.weather,
             factors.temperature,
             factors.formality,
@@ -153,10 +212,10 @@ exports.getOutfitRecommendations = async (userId, factors, limit = 10) => {
         let predictedRating = predictionData[0];
 
         ratedOutfits.push({
-            outfit: {
-                top: outfit.top.id,
-                bottom: outfit.bottom.id
-            },
+            outfit: [
+                outfit.top.garment,
+                outfit.bottom.garment
+            ],
             rating: predictedRating
         });
     }
@@ -171,5 +230,171 @@ exports.getOutfitRecommendations = async (userId, factors, limit = 10) => {
     return {
         message: 'Generated user recommendations',
         data: recommendations
+    }
+}
+
+exports.addOutfit = async (userId, outfit) => {
+    let foundUser = await User.findById(userId);
+    foundUser.outfits.push(outfit);
+    let updatedUser = await foundUser.save();
+
+    return {
+        status: 200,
+        success: true,
+        data: updatedUser
+    }
+}
+
+exports.updateOutfit = async (userId, outfit, params) => {
+    let foundUser = await User.findById(userId);
+
+    let index = -1;
+    for(let i = 0; i < foundUser.outfits.length; i++) {
+        if(foundUser.outfits[i]._id == outfit) {
+            index = i;
+        }
+    }
+
+    if(index != -1) {
+        if("shared" in params)
+            foundUser.outfits[index].shared = params.shared;
+        if("category" in params)
+            foundUser.outfits[index].category = params.category;
+        if("rating" in params)
+            foundUser.outfits[index].rating = params.rating;
+        await foundUser.save();
+    }
+
+    return {
+        status: 200,
+        success: true,
+        modifiedOutfit: index,
+        data: foundUser
+    }
+}
+
+exports.deleteOutfit = async (userId, outfit) => {
+    let foundUser = await User.findById(userId);
+    
+    let index = -1;
+    for(let i = 0; i < foundUser.outfits.length; i++) {
+        if(foundUser.outfits[i]._id == outfit) {
+            index = i;
+        }
+    }
+
+    if(index != -1) {
+        foundUser.outfits.splice(index, 1);
+        await foundUser.save();
+    }
+
+    return {
+        status: 200,
+        success: true,
+        data: foundUser
+    }
+}
+
+exports.wearOutfit = async (userId, outfit) => {
+    let foundUser = await User.findById(userId);
+    
+    let index = -1;
+    for(let i = 0; i < foundUser.outfits.length; i++) {
+        if(foundUser.outfits[i]._id == outfit) {
+            index = i;
+        }
+    }
+
+    if(index != -1) {
+        let outfit = foundUser.outfits[index];
+        delete outfit._id
+        foundUser.history.push(outfit);
+        await foundUser.save();
+    }
+
+    return {
+        status: 200,
+        success: true,
+        data: foundUser
+    }
+}
+
+exports.deleteHistoryItem = async (userId, item) => {
+    let foundUser = await User.findById(userId);
+
+    let index = -1;
+    for(let i = 0; i < foundUser.history.length; i++) {
+        if(foundUser.history[i]._id == item) {
+            index = i;
+        }
+    }
+
+    if(index != -1) {
+        foundUser.history.split(index, 1);
+        await foundUser.save();
+    }
+
+    return {
+        status: 200,
+        success: true,
+        data: foundUser
+    }
+}
+
+exports.clearHistory = async (userId) => {
+    let foundUser = await User.findById(userId);
+
+    foundUser.history = [];
+    await foundUser.save();
+
+
+    return {
+        status: 200,
+        success: true,
+        data: foundUser
+    }
+}
+
+exports.getSharedOutfits = async(userId) => {
+    let outfits = [];
+
+    let users = await User.find();
+
+    for(let i = 0; i < users.length; i++) {
+        outfits.push([users[i].username, []]);
+        for(let j = 0; j < users[i].outfits.length; j++) {
+            if(users[i].outfits[j].shared)
+                outfits[i][1].push(users[i].outfits[j]);
+        }
+    }
+
+    return {
+        status: 200,
+        data: outfits.splice(0, 200),
+    }
+}
+
+exports.rateOutfit = async(outfitId, ownerUsr, myRating) => {
+    let owner = await User.findOne({username: ownerUsr});
+
+    let outfit = null;
+    for(let i = 0; i < owner.outfits.length; i++) {
+        if(owner.outfits[i]._id == outfitId) {
+            outfit = i;
+            break;
+        }
+    }
+
+    let rating = owner.outfits[outfit].communityRating * owner.outfits[outfit].numberOfRatings;
+    rating += myRating;
+
+    owner.outfits[outfit].numberOfRatings = owner.outfits[outfit].numberOfRatings + 1;
+    owner.outfits[outfit].communityRating = rating / owner.outfits[outfit].numberOfRatings;
+
+    await owner.save();
+
+    return {
+        status: 200,
+        data: owner.outfits[outfit]
     }
 }

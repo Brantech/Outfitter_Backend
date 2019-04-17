@@ -24,6 +24,7 @@
     "jsonwebtoken": "^8.4.0",
     "jwk-to-pem": "^2.0.1",
     "mongoose": "^5.4.20",
-    "mongoose-validator": "^2.1.0"
+    "mongoose-validator": "^2.1.0",
+    "mongoose-sequence": "^5.0.1"
   }
 }

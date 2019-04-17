@@ -37,6 +37,8 @@ router.post('/',
         UserController.newUser,
         (req, res, next) => [
             res.locals.auth.sub,
+            req.body.username,
+            req.body.role
         ]
     )
 );
@@ -53,6 +55,41 @@ router.delete('/',
         ]
     )
 );
+
+/**
+ * Allows an admin to delete a user.
+ */
+router.delete('/:id',
+    Authentication,
+    ControllerHandler(
+        UserController.deleteUser,
+        (req, res, next) => [
+            req.params.id,
+        ]
+    )
+);
+
+router.get('/info',
+    Authentication,
+    ControllerHandler(
+        UserController.getUser,
+        (req, res, next) => [
+            res.locals.auth.sub
+        ]
+    )
+)
+
+router.put('/rate',
+    Authentication,
+    ControllerHandler(
+        UserController.rateOutfit,
+        (req, res, next) => [
+            req.body.outfitId,
+            req.body.owner,
+            req.body.rating
+        ]
+    )
+)
 
 // api/users/garments ------------------------------------------------------------
 
@@ -118,6 +155,69 @@ router.delete('/garments/:id',
     )
 );
 
+router.get('/garments/generateOutfits',
+    Authentication, [
+        check.query('limit').isInt({min: 0}).optional(),
+        check.query('offset').isInt({min: 0}).optional()
+    ],
+    ControllerHandler(
+        UserController.getOutfitRecommendations,
+        (req, res, next) => [
+            res.locals.auth.sub,
+            req.body,
+            req.query.limit ? parseInt(req.query.limit) : undefined,
+            req.query.offset ? parseInt(req.query.offset) : undefined,
+        ]
+    )
+);
+
+// api/users/outfits ------------------------------------------------------------
+
+router.post('/outfits',
+    Authentication,
+    ControllerHandler(
+        UserController.addOutfit,
+        (req, res, next) => [
+            res.locals.auth.sub,
+            req.body
+        ]
+    )
+)
+
+router.put('/outfits/:id',
+    Authentication,
+    ControllerHandler(
+        UserController.updateOutfit,
+        (req, res, next) => [
+            res.locals.auth.sub,
+            req.params.id,
+            req.body
+        ]
+    )
+)
+
+router.delete('/outfits/:id',
+    Authentication,
+    ControllerHandler(
+        UserController.deleteOutfit,
+        (req, res, next) => [
+            res.locals.auth.sub,
+            req.params.id
+        ]
+    )
+)
+
+router.post('/outfits/wear/:id',
+    Authentication,
+    ControllerHandler(
+        UserController.wearOutfit,
+        (req, res, next) => [
+            res.locals.auth.sub,
+            req.params.id
+        ]
+    )
+)
+
 // api/users/history ------------------------------------------------------------
 
 /**
@@ -132,6 +232,27 @@ router.get('/history',
         ]
     )
 );
+
+router.delete('/history/all',
+    Authentication,
+    ControllerHandler(
+        UserController.clearHistory,
+        (req, res, next) => [
+            res.locals.auth.sub,
+        ]
+    )
+)
+
+router.delete('/history/:id',
+    Authentication,
+    ControllerHandler(
+        UserController.deleteHistoryItem,
+        (req, res, next) => [
+            res.locals.auth.sub,
+            req.params.id
+        ]
+    )
+)
 
 // api/users/recommendations ----------------------------------------------------
 
@@ -161,6 +282,15 @@ router.get('/recommendations',
     )
 );
 
-// ------------------------------------------------------------------------------
+// api/users/feed ----------------------------------------------------------------
 
+router.get('/feed',
+    Authentication,
+    ControllerHandler(
+        UserController.getSharedOutfits,
+        (req, res, next) => [
+            res.locals.auth.sub,
+        ]
+    )
+);
 module.exports = router;

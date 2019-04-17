@@ -8,6 +8,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var apiRouter = require('./routes/api');
 var config = require('./config');
+var bodyParser = require('body-parser');
 
 var app = express();
 var debug = createDebug(config.debugId);
@@ -15,9 +16,10 @@ var debug = createDebug(config.debugId);
 /**
  * Configure express middleware and api route(s).
  */
-app.use(express.urlencoded({extended: true}));
-app.use(express.json());
-app.use(cors({origin: config.cors.origins}))
+app.use(bodyParser.json({limit: "50mb", parameterLimit:2000000}));
+app.use(bodyParser.urlencoded({extended: true, limit: "50mb", parameterLimit:2000000}));
+app.use(bodyParser());
+app.use(cors({}))
 app.use('/api', apiRouter);
 
 /**

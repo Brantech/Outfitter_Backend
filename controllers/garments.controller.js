@@ -9,14 +9,19 @@ exports.getGarment = async (garmentId) => {
     };
 }
 
-exports.getGarments = async (limit, offset = 0) => {
-    let query = Garment.find({}).skip(offset);   
-    if (limit) {
-        query.limit(limit);
+// Get all garments
+exports.getGarments = async (limit = 10, offset = 0, category = null) => {
+    let results = null;
+    
+    if(category == null) {
+        results = await Garment.find({})
+        .limit(limit)
+        .skip(offset);
+    } else {
+        results = await Garment.find({category: category})
+        .limit(limit)
+        .skip(offset);
     }
-
-    let results = await query;
-
     return {
         success: true,
         count: results.length,
